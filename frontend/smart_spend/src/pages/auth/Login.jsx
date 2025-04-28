@@ -1,16 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import AuthLayout from "../../components/layouts/AuthLayout";
 import { useNavigate, Link } from "react-router-dom";
 import Input from "../../components/inputs/input";
 import { validateEmail } from "../../utils/helper";
-import axios from "axios";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
+import { UserContext } from "../../context/userContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+
+  const { updateUser } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -34,20 +36,21 @@ const Login = () => {
     //Login API Call
 
     try {
-      const responce = await axiosInstance.post(API_PATH.AUTH.LOGIN, {
+      const response = await axiosInstance.post(API_PATH.AUTH.LOGIN, {
         email,
         password,
       });
 
-      const { token, user } = responce.data;
+      const { token, user } = response.data;
 
       if (token) {
         localStorage.setItem("token", token);
+        updateUser(user);
         navigate("/dashboard");
       }
     } catch (err) {
-      if (error.responce && error.responce.data.message) {
-        setError(error.responce.data.message);
+      if (err.response && err.response.data.message) {
+        setError(err.responce.data.message);
       } else {
         setError("Something went wrong. Please try again");
       }
@@ -87,7 +90,7 @@ const Login = () => {
           <p className="text-[13px] text-slate-800 mt-3">
             Don`t have an account{" "}
             <Link to="/signup" className="font-medium text-primary underline">
-              SingUp
+              SignUp
             </Link>
           </p>
         </form>

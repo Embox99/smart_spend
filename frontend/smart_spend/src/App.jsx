@@ -10,10 +10,11 @@ import SignUp from "./pages/auth/SignUp";
 import Home from "./pages/dashboard/Home";
 import Income from "./pages/dashboard/Income";
 import Expense from "./pages/dashboard/Expense";
+import UserProvider from "./context/userContext";
 
 const App = () => {
   return (
-    <div>
+    <UserProvider>
       <Router>
         <Routes>
           <Route path="/" element={<Root />}></Route>
@@ -24,7 +25,7 @@ const App = () => {
           <Route path="/expense" exact element={<Expense />}></Route>
         </Routes>
       </Router>
-    </div>
+    </UserProvider>
   );
 };
 

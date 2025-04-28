@@ -25,7 +25,7 @@ exports.registerUser = async (req, res) => {
     }
     //Create user
 
-    const User = await User.create({
+    const user = await User.create({
       fullName,
       email,
       password,
@@ -70,7 +70,7 @@ exports.loginUser = async (req, res) => {
 //get user
 exports.getUserInfo = async (req, res) => {
   try {
-    const user = User.findById(req.user._id).select("-password");
+    const user = await User.findById(req.user._id).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
