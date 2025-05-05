@@ -20,7 +20,7 @@ const App = () => {
           <Route path="/" element={<Root />}></Route>
           <Route path="/login" exact element={<Login />}></Route>
           <Route path="/signUp" exact element={<SignUp />}></Route>
-          <Route path="/dashboar" exact element={<Home />}></Route>
+          <Route path="/dashboard" exact element={<Home />}></Route>
           <Route path="/income" exact element={<Income />}></Route>
           <Route path="/expense" exact element={<Expense />}></Route>
         </Routes>
@@ -34,5 +34,9 @@ export default App;
 const Root = () => {
   const isAuthenticated = !!localStorage.getItem("token");
 
-  return isAuthenticated? (<Navigate to="/dashboard"/>) : (<Navigate to="/login"/>)
+  return isAuthenticated ? (
+    <Navigate to="/dashboard" />
+  ) : (
+    <Navigate to="/login" />
+  );
 };
