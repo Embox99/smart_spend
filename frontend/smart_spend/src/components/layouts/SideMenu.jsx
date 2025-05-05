@@ -3,8 +3,8 @@ import { SIDE_MENU_DATA } from "../../utils/data";
 import { useNavigate } from "react-router-dom";
 import { UserContext } from "../../context/userContext";
 
-const SideMenu = (activeMenu) => {
-  const [user, clearUser] = useContext(UserContext);
+const SideMenu = ({ activeMenu }) => {
+  const {user, clearUser} = useContext(UserContext);
   const navigate = useNavigate();
 
   const handleClick = (route) => {
