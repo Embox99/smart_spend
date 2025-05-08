@@ -13,16 +13,18 @@ const Navbar = ({ activeMenu }) => {
         }}
       >
         {openSideMenu ? (
-          <HiOutlineMenu className="text-2xl" />
-        ) : (
           <HiOutlineX className="text-2xl" />
+        ) : (
+          <HiOutlineMenu className="text-2xl" />
         )}
       </button>
       <h2 className="text-lg font-medium text-black">Expense Tracker</h2>
 
-      {openSideMenu && <div className="fixed top-[61px] -ml-4 bg-white">
-        <SideMenu activeMenu={activeMenu}/>
-        </div>}
+      {openSideMenu && (
+        <div className="fixed top-[61px] -ml-4 bg-white">
+          <SideMenu activeMenu={activeMenu} />
+        </div>
+      )}
     </div>
   );
 };
