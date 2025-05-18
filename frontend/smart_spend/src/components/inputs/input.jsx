@@ -1,10 +1,10 @@
 import { React, useState } from "react";
 import { FaRegEye, FaRegEyeSlash } from "react-icons/fa6";
 
-const input = ({ value, onChange, placeholder, label, type }) => {
+const Input = ({ value, onChange, placeholder, label, type }) => {
   const [showPassword, setShowPassword] = useState(false);
 
- const  toggleShowPassword = () => {
+  const toggleShowPassword = () => {
     setShowPassword(!showPassword);
   };
   return (
@@ -43,4 +43,4 @@ const input = ({ value, onChange, placeholder, label, type }) => {
   );
 };
 
-export default input;
+export default Input;
