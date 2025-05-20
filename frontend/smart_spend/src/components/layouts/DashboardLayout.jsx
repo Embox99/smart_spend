@@ -7,6 +7,9 @@ import { useUserAuth } from "../../hooks/useUserAuth";
 const DashboardLayout = ({ children, activeMenu }) => {
   const { user } = useContext(UserContext);
   useUserAuth();
+  if (user === null) {
+    return <div>Loading...</div>;
+  }
   return (
     <div className="">
       <Navbar activeMenu={activeMenu} />

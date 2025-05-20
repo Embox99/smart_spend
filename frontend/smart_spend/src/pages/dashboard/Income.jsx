@@ -23,14 +23,11 @@ const Income = () => {
     setLoading(true);
 
     try {
-      const responce = await axiosInstance.get(
-        `${API_PATH.INCOME.GET_ALL_INCOME}`
-      );
-      if (responce.data) {
-        setIncomeData(responce.data);
-      }
+      const responce = await axiosInstance.get(API_PATH.INCOME.GET_ALL_INCOME);
+      setIncomeData(responce.data);
     } catch (err) {
       console.error("Something went wrong. Please try again", err);
+      toast.error("Error downloading icome list");
     } finally {
       setLoading(false);
     }
@@ -68,7 +65,7 @@ const Income = () => {
     } catch (err) {
       console.error(
         "Error adding income:",
-        err.responce?.data?.message || err.message
+        err.response?.data?.message || err.message
       );
     }
   };
