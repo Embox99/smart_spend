@@ -58,7 +58,7 @@ const Income = () => {
     try {
       await axiosInstance.post(API_PATH.INCOME.ADD_INCOME, {
         source,
-        amount,
+        amount: Number(amount),
         date,
         icon,
       });
@@ -68,7 +68,7 @@ const Income = () => {
     } catch (err) {
       console.error(
         "Error adding income:",
-        err.responce?.date?.message || err.message
+        err.responce?.data?.message || err.message
       );
     }
   };

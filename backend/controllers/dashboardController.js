@@ -20,7 +20,7 @@ exports.getDashboardData = async (req, res) => {
       userId: isValidObjectId(userId),
     });
 
-    const totalExpense = await Income.aggregate([
+    const totalExpense = await Expense.aggregate([
       { $match: { userId: userObjectId } },
       { $group: { _id: null, total: { $sum: "$amount" } } },
     ]);
@@ -29,7 +29,7 @@ exports.getDashboardData = async (req, res) => {
 
     const last60DaysIncomeTransactions = await Income.find({
       userId,
-      data: { $gte: new Date.now() - 60 * 24 * 60 * 60 * 1000 },
+      date: { $gte: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000) },
     }).sort({ date: -1 });
 
     //get total income for last 60 days
@@ -43,7 +43,7 @@ exports.getDashboardData = async (req, res) => {
 
     const last30DaysExpenseTransactions = await Expense.find({
       userId,
-      data: { $gte: new Date.now() - 30 * 24 * 60 * 60 * 1000 },
+      date: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) },
     }).sort({ date: -1 });
 
     // get total expenses for last 30 days
@@ -62,13 +62,12 @@ exports.getDashboardData = async (req, res) => {
           type: "income",
         })
       ),
-      ...Expense(
-        (await Expense.find({ userId }).sort({ date: -1 }).limit(5)).map(
-          (tns) => ({
-            ...tns.toObject(),
-            type: "expense",
-          })
-        )
+
+      ...(await Expense.find({ userId }).sort({ date: -1 }).limit(5)).map(
+        (tns) => ({
+          ...tns.toObject(),
+          type: "expense",
+        })
       ),
     ].sort((a, b) => b.date - a.date); //Sort latest first
 
