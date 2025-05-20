@@ -24,7 +24,7 @@ const Income = () => {
 
     try {
       const responce = await axiosInstance.get(API_PATH.INCOME.GET_ALL_INCOME);
-      setIncomeData(responce.data);
+      setIncomeData(responce.data || []);
     } catch (err) {
       console.error("Something went wrong. Please try again", err);
       toast.error("Error downloading icome list");

@@ -26,7 +26,9 @@ const Home = () => {
     setLoading(true);
 
     try {
-      const responce = axiosInstance.get(`${API_PATH.DASHBOARD.GET_DATA}`);
+      const responce = await axiosInstance.get(
+        `${API_PATH.DASHBOARD.GET_DATA}`
+      );
 
       if (responce.data) {
         setDashboardData(responce.data);
@@ -74,7 +76,7 @@ const Home = () => {
           />
           <FinanceOverview
             totalBalance={dashboardData?.totalBalance || 0}
-            totalIncome={dashboardData?.totalIncome || 0}
+            totalIncome={dashboardData?.totalIncome?.[0]?.total || 0}
             totalExpense={dashboardData?.totalExpense || 0}
           />
           <ExpenseTransaction
