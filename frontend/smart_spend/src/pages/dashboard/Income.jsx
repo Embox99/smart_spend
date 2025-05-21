@@ -6,6 +6,7 @@ import { API_PATH } from "../../utils/apiPaths";
 import Modal from "../../components/Modal";
 import AddIncomeForm from "../../components/income/AddIncomeForm";
 import toast from "react-hot-toast";
+import IncomeList from "../../components/income/IncomeList";
 
 const Income = () => {
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
@@ -94,6 +95,11 @@ const Income = () => {
               onAddIncome={() => setOpenAddIncomeModal(true)}
             />
           </div>
+          <IncomeList
+            transactions={incomeData}
+            onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
+            onDownload={handleDownloadIncomeDetails}
+          />
         </div>
         <Modal
           isOpen={openAddIncomeModal}
