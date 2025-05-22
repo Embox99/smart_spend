@@ -7,6 +7,7 @@ import Modal from "../../components/Modal";
 import AddIncomeForm from "../../components/income/AddIncomeForm";
 import toast from "react-hot-toast";
 import IncomeList from "../../components/income/IncomeList";
+import DeleteAlert from "../../components/DeleteAlert";
 
 const Income = () => {
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
@@ -107,6 +108,16 @@ const Income = () => {
           title="Add Income"
         >
           <AddIncomeForm onAddIncome={handleAddIncome} />
+        </Modal>
+        <Modal
+          inOpen={openDeleteAlert.show}
+          onClose={() => setOpenDeleteAlert({ show: false, data: null })}
+          title="Delete Income"
+        >
+          <DeleteAlert
+            content="Are you sure you want to delete this income details"
+            onDelete={() => deleteIncome(openDeleteAlert.data)}
+          />
         </Modal>
       </div>
     </DashboardLayout>
