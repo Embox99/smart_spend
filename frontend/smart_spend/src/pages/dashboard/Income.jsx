@@ -74,7 +74,19 @@ const Income = () => {
 
   //Delete Income
 
-  const deleteIncome = async (id) => {};
+  const deleteIncome = async (id) => {
+    try {
+      await axiosInstance.delete(API_PATH.INCOME.DELETE_INCOME(id));
+      setOpenDeleteAlert({ show: false, data: null });
+      toast.success("Income details deleted successfully");
+      fetchIncomeDetails();
+    } catch (err) {
+      console.error(
+        "Error deleting income:",
+        err.response?.data?.message || err.message
+      );
+    }
+  };
 
   //Handle download Income details
 
@@ -110,7 +122,7 @@ const Income = () => {
           <AddIncomeForm onAddIncome={handleAddIncome} />
         </Modal>
         <Modal
-          inOpen={openDeleteAlert.show}
+          isOpen={openDeleteAlert.show}
           onClose={() => setOpenDeleteAlert({ show: false, data: null })}
           title="Delete Income"
         >
