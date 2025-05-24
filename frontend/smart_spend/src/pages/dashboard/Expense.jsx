@@ -3,6 +3,9 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { API_PATH } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
 import { ExpenseOverview } from "../../components/expense/ExpenseOverview";
+import AddExpenseForm from "../../components/expense/AddExpenseForm";
+import Modal from "../../components/Modal";
+import toast from "react-hot-toast";
 
 const Expense = () => {
   const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
@@ -82,10 +85,17 @@ const Expense = () => {
           <div className="">
             <ExpenseOverview
               transactions={ExpenseData}
-              onExpenseIncome={() => setOpenAddExpenseModal}
+              onExpenseIncome={() => setOpenAddExpenseModal(true)}
             />
           </div>
         </div>
+        <Modal
+          isOpen={openAddExpenseModal}
+          onClose={() => setOpenAddExpenseModal(false)}
+          title="Add Expense"
+        >
+          <AddExpenseForm onAddExpense={handleAddExpense} />
+        </Modal>
       </div>
     </DashboardLayout>
   );
