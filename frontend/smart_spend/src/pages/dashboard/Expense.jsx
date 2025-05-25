@@ -92,7 +92,28 @@ const Expense = () => {
 
   //Handle download Expense details
 
-  const handleDownloadExpenseDetails = async () => {};
+  const handleDownloadExpenseDetails = async () => {
+    try {
+      const responce = await axiosInstance.get(
+        API_PATH.EXPENSE.DOWNLOAD_EXPENSE,
+        { responseType: "blob" }
+      );
+
+      //Create a URL for the blob
+
+      const url = window.URL.createObjectURL(responce.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "expense_details.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error downloading expense details:", err);
+      toast.error("Failed to download expense details. Please try again");
+    }
+  };
 
   useEffect(() => {
     fetchExpenseDetails();
