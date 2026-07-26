@@ -7,7 +7,7 @@ const generateToken = (id) => {
 
 // Register user
 exports.registerUser = async (req, res) => {
-  const { fullName, email, password } = req.body;
+  const { fullName, email, password, profileImageUrl } = req.body;
 
   if (!fullName || !email || !password) {
     return res.status(400).json({ message: "All fields are required" });
@@ -19,7 +19,12 @@ exports.registerUser = async (req, res) => {
       return res.status(400).json({ message: "Email is already used" });
     }
 
-    const user = await User.create({ fullName, email, password });
+    const user = await User.create({
+      fullName,
+      email,
+      password,
+      profileImageUrl: profileImageUrl || null,
+    });
 
     // Never return password hash — select only safe fields
     const safeUser = await User.findById(user._id).select("-password");

@@ -15,4 +15,7 @@ const IncomeSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+// Every list/aggregate query filters by owner and sorts or ranges on date.
+IncomeSchema.index({ userId: 1, date: -1 });
+
 module.exports = mongoose.model("Income", IncomeSchema);

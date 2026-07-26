@@ -10,6 +10,7 @@ const getProgressColor = (pct) => {
 const BudgetCard = ({ budget, onDelete }) => {
   const { category, limit, spent, remaining, percentUsed, icon } = budget;
   const colors = getProgressColor(percentUsed);
+  const barWidth = Math.min(percentUsed, 100);
 
   return (
     <div className="card group relative">
@@ -44,7 +45,7 @@ const BudgetCard = ({ budget, onDelete }) => {
       <div className="w-full bg-gray-100 dark:bg-gray-800 rounded-full h-2 mb-3">
         <div
           className={`h-2 rounded-full transition-all duration-500 ${colors.bar}`}
-          style={{ width: `${percentUsed}%` }}
+          style={{ width: `${barWidth}%` }}
         />
       </div>
 

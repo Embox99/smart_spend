@@ -17,6 +17,8 @@
  * @param {string} textField    — model field to search ("category" or "source")
  * @returns {{ filter, sort, skip, limit, page }}
  */
+const escapeRegex = (str) => str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const buildQuery = (queryParams, textField) => {
   const {
     from, to,
@@ -31,34 +33,35 @@ const buildQuery = (queryParams, textField) => {
   const filter = {};
 
   // ── date range ────────────────────────────────────────────────────────────
-  if (from || to) {
-    filter.date = {};
-    if (from) {
-      const d = new Date(from);
-      if (!isNaN(d)) filter.date.$gte = d;
-    }
-    if (to) {
-      // Include the full "to" day by setting time to 23:59:59
-      const d = new Date(to);
-      if (!isNaN(d)) {
-        d.setHours(23, 59, 59, 999);
-        filter.date.$lte = d;
-      }
+  // Ranges are only attached once they hold at least one bound — an empty
+  // object here would make Mongo look for a literal {} and match nothing.
+  const dateRange = {};
+  if (from) {
+    const d = new Date(from);
+    if (!isNaN(d)) dateRange.$gte = d;
+  }
+  if (to) {
+    // Include the full "to" day by setting time to 23:59:59
+    const d = new Date(to);
+    if (!isNaN(d)) {
+      d.setHours(23, 59, 59, 999);
+      dateRange.$lte = d;
     }
   }
+  if (Object.keys(dateRange).length) filter.date = dateRange;
 
   // ── amount range ──────────────────────────────────────────────────────────
-  if (minAmount !== undefined || maxAmount !== undefined) {
-    filter.amount = {};
-    const min = parseFloat(minAmount);
-    const max = parseFloat(maxAmount);
-    if (!isNaN(min)) filter.amount.$gte = min;
-    if (!isNaN(max)) filter.amount.$lte = max;
-  }
+  const amountRange = {};
+  const min = parseFloat(minAmount);
+  const max = parseFloat(maxAmount);
+  if (!isNaN(min)) amountRange.$gte = min;
+  if (!isNaN(max)) amountRange.$lte = max;
+  if (Object.keys(amountRange).length) filter.amount = amountRange;
 
   // ── text search on category / source ─────────────────────────────────────
+  // Escaped so a crafted pattern like "(a+)+$" cannot stall the server.
   if (search && search.trim()) {
-    filter[textField] = { $regex: search.trim(), $options: "i" };
+    filter[textField] = { $regex: escapeRegex(search.trim()), $options: "i" };
   }
 
   // ── sort ──────────────────────────────────────────────────────────────────

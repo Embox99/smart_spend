@@ -43,7 +43,9 @@ exports.getBudgets = async (req, res) => {
         ...b.toObject(),
         spent,
         remaining: Math.max(b.limit - spent, 0),
-        percentUsed: Math.min(Math.round((spent / b.limit) * 100), 100),
+        // Not capped at 100 — the client needs the real figure to show
+        // how far over budget a category has gone.
+        percentUsed: Math.round((spent / b.limit) * 100),
       };
     });
 

@@ -3,8 +3,16 @@ const bcrypt = require("bcryptjs");
 
 const UserSchema = new mongoose.Schema(
   {
-    fullName: { type: String, required: true },
-    email: { type: String, require: true, unique: true },
+    fullName: { type: String, required: true, trim: true },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
+    // Length is checked before hashing — a minlength here would only ever
+    // see the 60-char bcrypt digest.
     password: { type: String, required: true },
     profileImageUrl: { type: String, default: null },
   },
