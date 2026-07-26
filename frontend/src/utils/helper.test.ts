@@ -1,0 +1,90 @@
+import { describe, expect, it } from "vitest";
+import type { Expense } from "@shared/types";
+import {
+  addThousandsSeparator,
+  getInitials,
+  prepareExpenseBarChartData,
+  prepareExpenseLineChartData,
+  validateEmail,
+} from "./helper";
+
+const expense = (over: Partial<Expense>): Expense =>
+  ({
+    _id: "1",
+    userId: "u",
+    category: "Food",
+    amount: 10,
+    date: "2024-03-15T00:00:00.000Z",
+    createdAt: "",
+    updatedAt: "",
+    ...over,
+  }) as Expense;
+
+describe("validateEmail", () => {
+  it.each(["a@b.co", "first.last@sub.example.com"])("accepts %s", (email) => {
+    expect(validateEmail(email)).toBe(true);
+  });
+
+  it.each(["", "nope", "a@b", "a b@c.com", "@b.com"])(
+    "rejects %s",
+    (email) => {
+      expect(validateEmail(email)).toBe(false);
+    }
+  );
+});
+
+describe("getInitials", () => {
+  it("takes the first letter of the first two words", () => {
+    expect(getInitials("Ada Lovelace King")).toBe("AL");
+  });
+
+  it("handles a single name, extra spaces and empty input", () => {
+    expect(getInitials("Ada")).toBe("A");
+    expect(getInitials("  Ada   Lovelace  ")).toBe("AL");
+    expect(getInitials("")).toBe("");
+    expect(getInitials(null)).toBe("");
+  });
+});
+
+describe("addThousandsSeparator", () => {
+  it("groups digits and keeps the fraction", () => {
+    expect(addThousandsSeparator(1234567)).toBe("1,234,567");
+    expect(addThousandsSeparator(1234.56)).toBe("1,234.56");
+    expect(addThousandsSeparator(999)).toBe("999");
+    expect(addThousandsSeparator(0)).toBe("0");
+  });
+
+  it("returns an empty string for missing input", () => {
+    expect(addThousandsSeparator(null)).toBe("");
+    expect(addThousandsSeparator(NaN)).toBe("");
+  });
+});
+
+describe("chart data preparation", () => {
+  it("keys expense bars by category", () => {
+    const points = prepareExpenseBarChartData([
+      expense({ category: "Rent", amount: 900 }),
+    ]);
+
+    expect(points).toEqual([{ category: "Rent", amount: 900 }]);
+  });
+
+  it("sorts the line series oldest first", () => {
+    const points = prepareExpenseLineChartData([
+      expense({ _id: "b", date: "2024-03-20T00:00:00.000Z", amount: 2 }),
+      expense({ _id: "a", date: "2024-03-01T00:00:00.000Z", amount: 1 }),
+    ]);
+
+    expect(points.map((p) => p.amount)).toEqual([1, 2]);
+  });
+
+  it("does not mutate the input array", () => {
+    const input = [
+      expense({ _id: "b", date: "2024-03-20T00:00:00.000Z" }),
+      expense({ _id: "a", date: "2024-03-01T00:00:00.000Z" }),
+    ];
+    prepareExpenseLineChartData(input);
+
+    expect(input[0]?._id).toBe("b");
+  });
+});
