@@ -6,12 +6,16 @@ const {
   downloadIncomeExcel,
 } = require("../controllers/incomeController");
 const { protect } = require("../middleware/authMiddleware");
+const validate = require("../middleware/validate");
+const { incomeSchema, idParamSchema } = require("../validators/schemas");
 
 const router = express.Router();
 
-router.post("/add", protect, addIncome);
-router.get("/get", protect, getAllIncome);
-router.get("/downloadexcel", protect, downloadIncomeExcel);
-router.delete("/:id", protect, deleteIncome);
+router.use(protect);
+
+router.post("/add", validate(incomeSchema), addIncome);
+router.get("/get", getAllIncome);
+router.get("/downloadexcel", downloadIncomeExcel);
+router.delete("/:id", validate(idParamSchema, "params"), deleteIncome);
 
 module.exports = router;

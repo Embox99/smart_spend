@@ -8,6 +8,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
 import uploadImage from "../../utils/uploadImage";
+import toast from "react-hot-toast";
 
 const SignUp = () => {
   const [profilePic, setProfilePic] = useState(null);
@@ -40,29 +41,32 @@ const SignUp = () => {
     setLoading(true);
 
     try {
-      let profileImageUrl = "";
-
-      if (profilePic) {
-        const imgUploadRes = await uploadImage(profilePic);
-        profileImageUrl = imgUploadRes.imageUrl || "";
-      }
-
       const response = await axiosInstance.post(API_PATH.AUTH.REGISTER, {
         fullName,
         email,
         password,
-        profileImageUrl,
       });
 
       const { token, user } = response.data;
+      if (!token) throw new Error("Registration did not return a token");
 
-      if (token) {
-        localStorage.setItem("token", token);
-        updateUser(user);
-        navigate("/dashboard");
+      localStorage.setItem("token", token);
+
+      // The upload endpoint requires authentication, so the avatar goes up
+      // after the account exists. A failure here must not block sign-up.
+      let signedUpUser = user;
+      if (profilePic) {
+        try {
+          const imgUploadRes = await uploadImage(profilePic);
+          signedUpUser = imgUploadRes.user || user;
+        } catch {
+          toast.error("Account created, but the photo could not be uploaded");
+        }
       }
+
+      updateUser(signedUpUser);
+      navigate("/dashboard");
     } catch (err) {
-      // Fixed: was using err.responce (typo) instead of err.response
       setError(err.response?.data?.message || "Something went wrong. Please try again.");
     } finally {
       setLoading(false);

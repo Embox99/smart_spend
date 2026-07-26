@@ -1,81 +1,74 @@
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const asyncHandler = require("../utils/asyncHandler");
+const AppError = require("../utils/AppError");
 
-const generateToken = (id) => {
-  return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-};
+const generateToken = (id) =>
+  jwt.sign({ id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
 
-// Register user
-exports.registerUser = async (req, res) => {
+const toAuthResponse = (user) => ({
+  id: user._id,
+  user: {
+    _id: user._id,
+    fullName: user.fullName,
+    email: user.email,
+    profileImageUrl: user.profileImageUrl,
+    createdAt: user.createdAt,
+  },
+  token: generateToken(user._id),
+});
+
+// POST /api/v1/auth/register
+exports.registerUser = asyncHandler(async (req, res) => {
   const { fullName, email, password, profileImageUrl } = req.body;
 
-  if (!fullName || !email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+  if (await User.exists({ email })) {
+    throw AppError.badRequest("Email is already used");
   }
 
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email is already used" });
-    }
+  const user = await User.create({
+    fullName,
+    email,
+    password,
+    profileImageUrl: profileImageUrl || null,
+  });
 
-    const user = await User.create({
-      fullName,
-      email,
-      password,
-      profileImageUrl: profileImageUrl || null,
-    });
+  res.status(201).json(toAuthResponse(user));
+});
 
-    // Never return password hash — select only safe fields
-    const safeUser = await User.findById(user._id).select("-password");
-
-    res.status(201).json({
-      id: user._id,
-      user: safeUser,
-      token: generateToken(user._id),
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Error registering user", error: err.message });
-  }
-};
-
-// Login user
-exports.loginUser = async (req, res) => {
+// POST /api/v1/auth/login
+exports.loginUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
+  const user = await User.findOne({ email });
+  if (!user || !(await user.comparePasswords(password))) {
+    // Deliberately identical for unknown email and wrong password.
+    throw AppError.badRequest("Invalid credentials");
   }
 
-  try {
-    const user = await User.findOne({ email });
-    if (!user || !(await user.comparePasswords(password))) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
+  res.status(200).json(toAuthResponse(user));
+});
 
-    const safeUser = await User.findById(user._id).select("-password");
+// GET /api/v1/auth/getUser
+exports.getUserInfo = asyncHandler(async (req, res) => {
+  res.status(200).json(req.user);
+});
 
-    res.status(200).json({
-      id: user._id,
-      user: safeUser,
-      token: generateToken(user._id),
-    });
-  } catch (err) {
-    res.status(500).json({ message: "Error logging in", error: err.message });
-  }
-};
+// POST /api/v1/auth/upload-image
+exports.uploadProfileImage = asyncHandler(async (req, res) => {
+  if (!req.file) throw AppError.badRequest("No file uploaded");
 
-// Get user info
-exports.getUserInfo = async (req, res) => {
-  try {
-    const user = await User.findById(req.user._id).select("-password");
+  const baseUrl = process.env.PUBLIC_URL || `${req.protocol}://${req.get("host")}`;
+  const imageUrl = `${baseUrl}/uploads/${req.file.filename}`;
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+  // Attach it to the caller so the image cannot be assigned to someone else.
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    { profileImageUrl: imageUrl },
+    { new: true }
+  ).select("-password");
 
-    res.status(200).json(user);
-  } catch (err) {
-    res.status(500).json({ message: "Error fetching user", error: err.message });
-  }
-};
+  res.status(200).json({ imageUrl, user });
+});
