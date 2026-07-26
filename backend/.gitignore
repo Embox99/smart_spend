@@ -3,3 +3,4 @@ node_modules/
 
 # Uploaded files are runtime state, not source
 uploads/
+dist/
