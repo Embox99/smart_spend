@@ -2,7 +2,7 @@
 
 # Smart Spend
 
-**Personal finance tracker built with the MERN stack**
+**Personal finance tracker — TypeScript across the stack**
 
 </div>
 
@@ -10,7 +10,10 @@
 
 ## Overview
 
-Smart Spend is a full-stack web application for tracking personal income and expenses. Users get a protected dashboard with charts, budget limits per category, transaction filters, and Excel exports — all with full dark mode support.
+Smart Spend is a full-stack web application for tracking personal income and
+expenses. Users get a protected dashboard with charts, per-category budget
+limits, transaction filters, and Excel exports — all with full dark mode
+support.
 
 ![Dashboard preview](./frontend/public/dashbord_preview.png)
 
@@ -23,7 +26,7 @@ Smart Spend is a full-stack web application for tracking personal income and exp
 - Add, view, and delete income and expense records with emoji icons
 - Debounced search and multi-field filters — by date range, amount, and category/source
 - Paginated lists (20 per page) with server-side sorting
-- Export filtered results to Excel (.xlsx)
+- Export filtered results to Excel (.xlsx), capped at 10k rows
 
 **Budgets**
 
@@ -42,18 +45,19 @@ Smart Spend is a full-stack web application for tracking personal income and exp
 
 **UI & UX**
 
-- Dark mode with system preference detection, persisted to localStorage
-- Responsive layout
-- Skeleton loaders on all async views
-- Protected routes — unauthenticated users are redirected to login
+- Dark mode with system preference detection, applied before first paint
+- Responsive layout, skeleton loaders, accessible dialogs (focus trap, Escape)
+- Protected routes that check token expiry, not just its presence
+- Route-level code splitting
 
 **Security**
 
-- JWT authentication (1-hour expiry)
-- Passwords hashed with bcrypt
-- Ownership check on every delete — users can only delete their own records
-- CORS restricted to allowed origins via `CLIENT_URL` env variable
-- Amount validated as positive number on both client and server
+- JWT authentication, bcrypt password hashing
+- Every request body, param and query validated with zod
+- Rate limits on auth, upload and the API as a whole
+- `helmet`, a 100 kB JSON body cap, and a CORS allowlist
+- Ownership enforced on every read and delete
+- Uploads restricted to 2 MB images with server-generated filenames
 
 ---
 
@@ -61,27 +65,45 @@ Smart Spend is a full-stack web application for tracking personal income and exp
 
 **Frontend**
 
-|                    |                                                  |
-| ------------------ | ------------------------------------------------ |
-| React 19 + Vite    | UI framework and build tool                      |
-| Tailwind CSS 3     | Utility-first styling with `darkMode: "class"`   |
-| Recharts           | Bar, area, and pie charts                        |
-| Axios              | HTTP client with request/response interceptors   |
-| React Router 7     | Client-side routing with protected routes        |
-| date-fns           | Lightweight date formatting (replaces moment.js) |
-| react-hot-toast    | Toast notifications                              |
-| emoji-picker-react | Emoji icon selector for transactions             |
+| | |
+| ------------------ | ----------------------------------------------- |
+| React 19 + Vite | UI framework and build tool |
+| TypeScript | Strict mode |
+| Tailwind CSS 3 | Utility-first styling with `darkMode: "class"` |
+| TanStack Query | Server state, caching, pagination |
+| Recharts | Bar, area, and pie charts |
+| Axios | HTTP client with request/response interceptors |
+| React Router 7 | Client-side routing with protected routes |
+| date-fns | Date formatting |
+| Vitest + Testing Library | Unit and component tests |
 
 **Backend**
 
-|                      |                                 |
+| | |
 | -------------------- | ------------------------------- |
-| Node.js + Express 5  | REST API server                 |
-| MongoDB + Mongoose 8 | Database and ODM                |
-| bcryptjs             | Password hashing                |
-| jsonwebtoken         | JWT generation and verification |
-| multer               | Profile image uploads           |
-| xlsx                 | Excel file generation           |
+| Node.js + Express 5 | REST API server |
+| TypeScript | Strict mode, compiled with tsc |
+| MongoDB + Mongoose 8 | Database and ODM |
+| zod | Request validation and inferred types |
+| bcryptjs | Password hashing |
+| jsonwebtoken | JWT generation and verification |
+| multer | Profile image uploads |
+| exceljs | Excel file generation |
+| Vitest + supertest | Integration tests on an in-memory MongoDB |
+
+---
+
+## Project Layout
+
+```
+backend/src      Express API — routes, controllers, models, middleware
+frontend/src     React SPA — pages, components, hooks, contexts
+shared/types.d.ts  Wire contract imported by both sides as @shared/types
+```
+
+`shared/types.d.ts` is the single source of truth for every response shape.
+Changing a field there breaks whichever side has not been updated, at compile
+time rather than in the browser.
 
 ---
 
@@ -89,7 +111,7 @@ Smart Spend is a full-stack web application for tracking personal income and exp
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
 - MongoDB (local or [Atlas](https://www.mongodb.com/atlas))
 
 ### Backend
@@ -97,20 +119,34 @@ Smart Spend is a full-stack web application for tracking personal income and exp
 ```bash
 cd backend
 cp env.example .env
-# Edit .env — set MONGO_URI, JWT_SECRET, CLIENT_URL
+# Edit .env — set MONGO_URI and JWT_SECRET at minimum
 npm install
-npm run dev          # starts on port 5000 with nodemon
+npm run dev          # tsx watch, port 5000
 ```
 
 ### Frontend
 
 ```bash
-cd frontend/smart_spend
+cd frontend
 cp env.example .env
 # Edit .env — set VITE_API_URL=http://localhost:5000
 npm install
-npm run dev          # starts on port 5173
+npm run dev          # vite, port 5173
 ```
+
+### Scripts
+
+Both packages expose the same set:
+
+| Script | Effect |
+| ----------- | ------------------------------------ |
+| `dev` | Run with hot reload |
+| `build` | Typecheck, then compile/bundle |
+| `start` | Run the compiled API (backend only) |
+| `typecheck` | `tsc --noEmit` |
+| `lint` | ESLint (frontend only) |
+| `test` | Vitest, single run |
+| `test:watch`| Vitest, watch mode |
 
 ---
 
@@ -118,16 +154,20 @@ npm run dev          # starts on port 5173
 
 ### Backend — `backend/.env`
 
-| Variable     | Description                             | Example                                 |
-| ------------ | --------------------------------------- | --------------------------------------- |
-| `MONGO_URI`  | MongoDB connection string               | `mongodb://localhost:27017/smart_spend` |
-| `JWT_SECRET` | Secret key for signing JWT tokens       | any long random string                  |
-| `CLIENT_URL` | Allowed CORS origin(s), comma-separated | `http://localhost:5173`                 |
-| `PORT`       | Port the API listens on                 | `5000`                                  |
+| Variable | Required | Description | Example |
+| ---------------- | -------- | ------------------------------------------------ | --------------------------------------- |
+| `MONGO_URI` | yes | MongoDB connection string | `mongodb://localhost:27017/smart_spend` |
+| `JWT_SECRET` | yes | Secret key for signing JWT tokens | any long random string |
+| `CLIENT_URL` | no | Allowed CORS origin(s), comma-separated | `http://localhost:5173` |
+| `PORT` | no | Port the API listens on (default 5000) | `5000` |
+| `JWT_EXPIRES_IN` | no | Token lifetime (default `7d`) | `7d` |
+| `PUBLIC_URL` | no | Base URL used to build uploaded-image links | `https://api.example.com` |
+| `TRUST_PROXY` | no | Set to `1` behind a reverse proxy so rate limiting sees the real IP | `1` |
+| `NODE_ENV` | no | `development` \| `production` \| `test` | `production` |
 
-### Frontend — `frontend/smart_spend/.env`
+### Frontend — `frontend/.env`
 
-| Variable       | Description                 | Example                 |
+| Variable | Description | Example |
 | -------------- | --------------------------- | ----------------------- |
 | `VITE_API_URL` | Base URL of the backend API | `http://localhost:5000` |
 
@@ -135,4 +175,74 @@ npm run dev          # starts on port 5173
 
 ## API Reference
 
-All endpoints except `/auth/register` and `/auth/login` require `Authorization: Bearer <token>`.
+Base path `/api/v1`. Every endpoint except `/auth/register` and `/auth/login`
+requires `Authorization: Bearer <token>`.
+
+### Auth
+
+| Method | Path | Body | Returns |
+| ------ | -------------------- | ------------------------------------------ | ---------------------------- |
+| POST | `/auth/register` | `fullName`, `email`, `password`, `profileImageUrl?` | `{ id, user, token }` |
+| POST | `/auth/login` | `email`, `password` | `{ id, user, token }` |
+| GET | `/auth/getUser` | — | `User` |
+| POST | `/auth/upload-image` | multipart `image` (≤ 2 MB, jpeg/png/webp) | `{ imageUrl, user }` |
+
+### Income and Expense
+
+`:kind` is `income` or `expense`.
+
+| Method | Path | Notes |
+| ------ | ---------------------------- | ------------------------------------------ |
+| POST | `/:kind/add` | `source`/`category`, `amount`, `date`, `icon?` |
+| GET | `/:kind/get` | Paginated, filterable — see below |
+| DELETE | `/:kind/:id` | Owner only; 404 otherwise |
+| GET | `/:kind/downloadexcel` | Same filters, returns .xlsx |
+
+Query params for `get` and `downloadexcel`:
+
+| Param | Type | Default | Notes |
+| ----------- | ------------------ | ------- | ---------------------------- |
+| `search` | string | — | Case-insensitive, regex-escaped |
+| `from`,`to` | `YYYY-MM-DD` | — | Inclusive on both ends |
+| `minAmount`, `maxAmount` | number | — | Inclusive |
+| `sortBy` | `date` \| `amount` | `date` | Anything else is ignored |
+| `order` | `asc` \| `desc` | `desc` | |
+| `page` | number | `1` | |
+| `limit` | number | `20` | Capped at 100 |
+
+Response: `{ data: T[], pagination: { total, page, limit, totalPages, hasNextPage, hasPrevPage } }`
+
+### Budgets
+
+| Method | Path | Notes |
+| ------ | -------------------- | ----------------------------------------------- |
+| GET | `/budget?month=YYYY-MM` | Defaults to the current month; adds `spent`, `remaining`, `percentUsed` |
+| POST | `/budget` | Upsert by `(category, month)` |
+| DELETE | `/budget/:id` | Owner only |
+
+`percentUsed` is not capped — a value above 100 means the category is over
+budget by that margin.
+
+### Dashboard
+
+| Method | Path | Notes |
+| ------ | ------------ | -------------------------------------------------- |
+| GET | `/dashboard` | Totals, last 30 days of expenses, last 60 days of income, 10 most recent transactions |
+
+### Other
+
+| Method | Path | Notes |
+| ------ | --------- | -------------------------------- |
+| GET | `/health` | Liveness and DB connection state |
+
+---
+
+## Testing
+
+```bash
+cd backend && npm test     # integration tests on an in-memory MongoDB
+cd frontend && npm test    # unit and component tests
+```
+
+CI runs typecheck, lint, tests and a production build for both packages on
+every push and pull request.
