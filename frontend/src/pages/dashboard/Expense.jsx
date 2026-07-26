@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { API_PATH } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosInstance";
@@ -8,7 +8,8 @@ import Modal from "../../components/Modal";
 import toast from "react-hot-toast";
 import ExpenseList from "../../components/expense/ExpenseList";
 import DeleteAlert from "../../components/DeleteAlert";
-import useTransactions from "../../hooks/useTransactions";
+import useTransactions, { buildParams } from "../../hooks/useTransactions";
+import downloadFile from "../../utils/download";
 
 const Expense = () => {
   const {
@@ -16,7 +17,6 @@ const Expense = () => {
     pagination,
     loading,
     filters,
-    page,
     setFilter,
     clearFilters,
     setPage,
@@ -59,23 +59,11 @@ const Expense = () => {
 
   const handleDownload = async () => {
     try {
-      const params = new URLSearchParams();
-      Object.entries(filters).forEach(([k, v]) => {
-        if (v !== "" && v !== undefined) params.set(k, v);
-      });
-      const res = await axiosInstance.get(
-        `${API_PATH.EXPENSE.DOWNLOAD_EXPENSE}?${params.toString()}`,
-        { responseType: "blob" }
+      await downloadFile(
+        `${API_PATH.EXPENSE.DOWNLOAD_EXPENSE}?${buildParams(filters)}`,
+        "expense_details.xlsx"
       );
-      const url = window.URL.createObjectURL(res.data);
-      const link = document.createElement("a");
-      link.href = url;
-      link.setAttribute("download", "expense_details.xlsx");
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
+    } catch {
       toast.error("Failed to download. Please try again.");
     }
   };

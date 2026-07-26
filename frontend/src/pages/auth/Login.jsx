@@ -6,6 +6,7 @@ import { validateEmail } from "../../utils/helper";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
+import { setToken } from "../../utils/token";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -40,9 +41,9 @@ const Login = () => {
       const { token, user } = response.data;
 
       if (token) {
-        localStorage.setItem("token", token);
+        setToken(token);
         updateUser(user);
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong. Please try again.");

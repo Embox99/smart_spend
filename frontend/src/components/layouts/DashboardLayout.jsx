@@ -1,17 +1,14 @@
-import React, { useContext } from "react";
 import Navbar from "./Navbar";
 import SideMenu from "./SideMenu";
-import { UserContext } from "../../context/userContext";
 import { useUserAuth } from "../../hooks/useUserAuth";
 
 const DashboardLayout = ({ children, activeMenu }) => {
-  const { user } = useContext(UserContext);
-  useUserAuth();
+  const { user, isLoading } = useUserAuth();
 
-  if (user === null) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-slate-50 dark:bg-gray-950">
-        <p className="text-gray-500 dark:text-gray-400 text-sm">Loading...</p>
+        <div className="w-8 h-8 border-2 border-violet-500 border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }

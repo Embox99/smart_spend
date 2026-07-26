@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import Input from "../inputs/input";
 import EmojiPickerPopup from "../EmojiPickerPopup";
 
 const currentMonth = () => new Date().toISOString().slice(0, 7);
 
-const AddBudgetForm = ({ onAdd, existingCategories = [] }) => {
+const AddBudgetForm = ({ onAdd }) => {
   const [form, setForm] = useState({
     category: "",
     limit: "",

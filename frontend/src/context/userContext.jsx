@@ -1,25 +1,20 @@
-import React, { createContext, useState } from "react";
+import { createContext, useCallback, useMemo, useState } from "react";
 
-export const UserContext = createContext();
+export const UserContext = createContext(null);
 
-const UserProvider = ({children}) => {
+const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
+  // Stable identities — consumers depend on these inside effects.
+  const updateUser = useCallback((userData) => setUser(userData), []);
+  const clearUser = useCallback(() => setUser(null), []);
 
-  const updateUser = (userData) => {
-    setUser(userData);
-  };
-
-
-  const clearUser = () => {
-    setUser(null);
-  };
-
-  return (
-    <UserContext.Provider value={{ user, updateUser, clearUser }}>
-      {children}
-    </UserContext.Provider>
+  const value = useMemo(
+    () => ({ user, updateUser, clearUser }),
+    [user, updateUser, clearUser]
   );
+
+  return <UserContext.Provider value={value}>{children}</UserContext.Provider>;
 };
 
 export default UserProvider;

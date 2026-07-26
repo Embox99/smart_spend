@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { LuPlus, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { format, addMonths, subMonths, parseISO } from "date-fns";
 import toast from "react-hot-toast";
@@ -15,34 +16,31 @@ const fromMonthStr = (s) => parseISO(`${s}-01`);
 const displayMonth = (s) => format(fromMonthStr(s), "MMMM yyyy");
 
 const Budgets = () => {
-  const [budgets, setBudgets] = useState([]);
-  const [loading, setLoading] = useState(false);
   const [month, setMonth] = useState(toMonthStr(new Date()));
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteAlert, setDeleteAlert] = useState({ show: false, id: null });
 
-  const fetchBudgets = async () => {
-    setLoading(true);
-    try {
+  const queryClient = useQueryClient();
+
+  const { data: budgets = [], isPending: loading } = useQuery({
+    queryKey: ["budgets", month],
+    queryFn: async () => {
       const res = await axiosInstance.get(
         `${API_PATH.BUDGET.GET_BUDGETS}?month=${month}`
       );
-      setBudgets(res.data || []);
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to load budgets");
-    } finally {
-      setLoading(false);
-    }
-  };
+      return res.data ?? [];
+    },
+  });
 
-  useEffect(() => { fetchBudgets(); }, [month]);
+  const invalidate = () =>
+    queryClient.invalidateQueries({ queryKey: ["budgets", month] });
 
   const handleAdd = async (data) => {
     try {
       await axiosInstance.post(API_PATH.BUDGET.UPSERT_BUDGET, data);
       setShowAddModal(false);
       toast.success("Budget saved");
-      fetchBudgets();
+      invalidate();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to save budget");
     }
@@ -53,7 +51,7 @@ const Budgets = () => {
       await axiosInstance.delete(API_PATH.BUDGET.DELETE_BUDGET(deleteAlert.id));
       setDeleteAlert({ show: false, id: null });
       toast.success("Budget deleted");
-      fetchBudgets();
+      invalidate();
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to delete budget");
     }

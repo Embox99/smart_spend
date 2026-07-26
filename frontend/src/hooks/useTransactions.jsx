@@ -1,5 +1,9 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { keepPreviousData, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosInstance from "../utils/axiosInstance";
+
+const PAGE_SIZE = 20;
+const DEBOUNCE_MS = 350;
 
 const EMPTY_FILTERS = {
   search: "",
@@ -11,51 +15,44 @@ const EMPTY_FILTERS = {
   order: "desc",
 };
 
+export const buildParams = (filters, page) => {
+  const params = new URLSearchParams();
+  Object.entries(filters).forEach(([k, v]) => {
+    if (v !== "" && v !== undefined && v !== null) params.set(k, v);
+  });
+  if (page) {
+    params.set("page", String(page));
+    params.set("limit", String(PAGE_SIZE));
+  }
+  return params;
+};
+
 const useTransactions = (endpoint) => {
-  const [filters, setFilters]           = useState(EMPTY_FILTERS);
-  const [page, setPage]                 = useState(1);
-  const [data, setData]                 = useState([]);
-  const [pagination, setPagination]     = useState(null);
-  const [loading, setLoading]           = useState(false);
+  const [filters, setFilters] = useState(EMPTY_FILTERS);
+  const [page, setPage] = useState(1);
+  const queryClient = useQueryClient();
 
-  // Debounce timer ref — avoids firing on every keystroke
-  const debounceTimer = useRef(null);
-
-  const fetchData = useCallback(
-    async (currentFilters, currentPage) => {
-      setLoading(true);
-      try {
-        // Build query string — omit empty values
-        const params = new URLSearchParams();
-        Object.entries(currentFilters).forEach(([k, v]) => {
-          if (v !== "" && v !== undefined) params.set(k, v);
-        });
-        params.set("page", currentPage);
-        params.set("limit", "20");
-
-        const res = await axiosInstance.get(`${endpoint}?${params.toString()}`);
-        setData(res.data.data || []);
-        setPagination(res.data.pagination || null);
-      } catch (err) {
-        console.error("Failed to fetch transactions:", err);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [endpoint]
-  );
-
+  // Typing in the search box should not fire a request per keystroke.
+  const [debouncedFilters, setDebouncedFilters] = useState(EMPTY_FILTERS);
   useEffect(() => {
-    clearTimeout(debounceTimer.current);
-    debounceTimer.current = setTimeout(() => {
-      fetchData(filters, page);
-    }, 350);
-    return () => clearTimeout(debounceTimer.current);
-  }, [filters, page, fetchData]);
+    const timer = setTimeout(() => setDebouncedFilters(filters), DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [filters]);
+
+  const { data, isFetching } = useQuery({
+    queryKey: [endpoint, debouncedFilters, page],
+    queryFn: async () => {
+      const params = buildParams(debouncedFilters, page);
+      const res = await axiosInstance.get(`${endpoint}?${params}`);
+      return res.data;
+    },
+    // Keep the previous page visible while the next one loads.
+    placeholderData: keepPreviousData,
+  });
 
   const setFilter = useCallback((key, value) => {
     setFilters((f) => ({ ...f, [key]: value }));
-    setPage(1); 
+    setPage(1);
   }, []);
 
   const clearFilters = useCallback(() => {
@@ -63,22 +60,25 @@ const useTransactions = (endpoint) => {
     setPage(1);
   }, []);
 
+  const refresh = useCallback(
+    () => queryClient.invalidateQueries({ queryKey: [endpoint] }),
+    [queryClient, endpoint]
+  );
 
-  const refresh = useCallback(() => {
-    fetchData(filters, page);
-  }, [fetchData, filters, page]);
-
-  return {
-    data,
-    pagination,
-    loading,
-    filters,
-    page,
-    setFilter,
-    clearFilters,
-    setPage,
-    refresh,
-  };
+  return useMemo(
+    () => ({
+      data: data?.data ?? [],
+      pagination: data?.pagination ?? null,
+      loading: isFetching,
+      filters,
+      page,
+      setFilter,
+      clearFilters,
+      setPage,
+      refresh,
+    }),
+    [data, isFetching, filters, page, setFilter, clearFilters, refresh]
+  );
 };
 
 export default useTransactions;

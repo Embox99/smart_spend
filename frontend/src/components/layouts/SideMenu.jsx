@@ -1,18 +1,23 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { SIDE_MENU_DATA } from "../../utils/data";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { UserContext } from "../../context/userContext";
+import { clearToken } from "../../utils/token";
 import CharAvatar from "../cards/CharAvatar";
 
 const SideMenu = ({ activeMenu }) => {
   const { user, clearUser } = useContext(UserContext);
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleClick = (route) => {
     if (route === "logout") {
-      localStorage.clear();
+      // Only the token — localStorage.clear() also wiped the theme choice.
+      clearToken();
       clearUser();
-      navigate("/login");
+      queryClient.clear();
+      navigate("/login", { replace: true });
       return;
     }
     navigate(route);

@@ -7,6 +7,7 @@ import ProfilePhotoSelector from "../../components/inputs/ProfilePhotoSelector";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { UserContext } from "../../context/userContext";
+import { setToken } from "../../utils/token";
 import uploadImage from "../../utils/uploadImage";
 import toast from "react-hot-toast";
 
@@ -50,7 +51,7 @@ const SignUp = () => {
       const { token, user } = response.data;
       if (!token) throw new Error("Registration did not return a token");
 
-      localStorage.setItem("token", token);
+      setToken(token);
 
       // The upload endpoint requires authentication, so the avatar goes up
       // after the account exists. A failure here must not block sign-up.
