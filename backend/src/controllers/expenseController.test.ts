@@ -15,6 +15,10 @@ const binaryParser = (
   res.on("end", () => callback(null, Buffer.concat(chunks)));
 };
 
+// supertest types the parser against superagent's Response, which is a
+// readable stream at runtime but not in the type definitions.
+const asParser = binaryParser as unknown as (str: string) => unknown;
+
 const addExpense = (user: TestUser, body: Record<string, unknown>) =>
   request(app)
     .post(`${ENDPOINT}/add`)
@@ -166,7 +170,7 @@ describe("expenses", () => {
       .get(`${ENDPOINT}/downloadexcel`)
       .set("Authorization", auth(user.token))
       .buffer(true)
-      .parse(binaryParser)
+      .parse(asParser)
       .expect(200);
 
     expect(res.headers["content-type"]).toContain("spreadsheetml");
