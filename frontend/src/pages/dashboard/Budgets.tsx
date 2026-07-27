@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { LuPlus, LuChevronLeft, LuChevronRight } from "react-icons/lu";
 import { format, addMonths, subMonths, parseISO } from "date-fns";
 import toast from "react-hot-toast";
@@ -13,6 +13,8 @@ import AddBudgetForm, {
 } from "../../components/budget/AddBudgetForm";
 import axiosInstance, { apiErrorMessage } from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
+import { queryKeys } from "../../utils/queryKeys";
+import { useInvalidateFinancials } from "../../hooks/useInvalidateFinancials";
 
 const toMonthStr = (d: Date): string => format(d, "yyyy-MM");
 const fromMonthStr = (s: string): Date => parseISO(`${s}-01`);
@@ -23,10 +25,10 @@ const Budgets = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const queryClient = useQueryClient();
+  const invalidate = useInvalidateFinancials();
 
   const { data: budgets = [], isPending: loading } = useQuery({
-    queryKey: ["budgets", month],
+    queryKey: queryKeys.budgetsForMonth(month),
     queryFn: async () => {
       const res = await axiosInstance.get<BudgetWithSpend[]>(
         `${API_PATH.BUDGET.GET_BUDGETS}?month=${month}`
@@ -35,15 +37,12 @@ const Budgets = () => {
     },
   });
 
-  const invalidate = () =>
-    void queryClient.invalidateQueries({ queryKey: ["budgets", month] });
-
   const handleAdd = async (payload: BudgetPayload) => {
     try {
       await axiosInstance.post(API_PATH.BUDGET.UPSERT_BUDGET, payload);
       setShowAddModal(false);
       toast.success("Budget saved");
-      invalidate();
+      invalidate("budget");
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to save budget"));
     }
@@ -55,7 +54,7 @@ const Budgets = () => {
       await axiosInstance.delete(API_PATH.BUDGET.DELETE_BUDGET(deleteId));
       setDeleteId(null);
       toast.success("Budget deleted");
-      invalidate();
+      invalidate("budget");
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to delete budget"));
     }

@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  keepPreviousData,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import type {
   Paginated,
   Pagination,
@@ -51,13 +47,11 @@ export interface UseTransactionsResult<T> {
   ) => void;
   clearFilters: () => void;
   setPage: (page: number) => void;
-  refresh: () => void;
 }
 
 const useTransactions = <T>(endpoint: string): UseTransactionsResult<T> => {
   const [filters, setFilters] = useState<TransactionFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
-  const queryClient = useQueryClient();
 
   // Typing in the search box should not fire a request per keystroke.
   const [debouncedFilters, setDebouncedFilters] =
@@ -93,10 +87,6 @@ const useTransactions = <T>(endpoint: string): UseTransactionsResult<T> => {
     setPage(1);
   }, []);
 
-  const refresh = useCallback(() => {
-    void queryClient.invalidateQueries({ queryKey: [endpoint] });
-  }, [queryClient, endpoint]);
-
   return useMemo(
     () => ({
       data: data?.data ?? [],
@@ -107,9 +97,8 @@ const useTransactions = <T>(endpoint: string): UseTransactionsResult<T> => {
       setFilter,
       clearFilters,
       setPage,
-      refresh,
     }),
-    [data, isFetching, filters, page, setFilter, clearFilters, refresh]
+    [data, isFetching, filters, page, setFilter, clearFilters]
   );
 };
 

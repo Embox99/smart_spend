@@ -5,6 +5,7 @@ import type { User } from "@shared/types";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATH } from "../utils/apiPaths";
 import { getToken, clearToken } from "../utils/token";
+import { queryKeys } from "../utils/queryKeys";
 import { useUser } from "./useUser";
 
 interface UseUserAuthResult {
@@ -21,7 +22,7 @@ export const useUserAuth = (): UseUserAuthResult => {
   const navigate = useNavigate();
 
   const { data, isError } = useQuery({
-    queryKey: ["user"],
+    queryKey: queryKeys.user,
     queryFn: async () => {
       const res = await axiosInstance.get<User>(API_PATH.AUTH.GET_USER_INFO);
       return res.data;

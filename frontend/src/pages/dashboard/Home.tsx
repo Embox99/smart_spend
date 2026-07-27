@@ -6,6 +6,7 @@ import type { DashboardData } from "@shared/types";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
+import { queryKeys } from "../../utils/queryKeys";
 import InfoCard from "../../components/cards/InfoCard";
 import { addThousandsSeparator } from "../../utils/helper";
 import RecentTransactions from "../../components/dashboard/RecentTransactions";
@@ -19,7 +20,7 @@ const Home = () => {
   const navigate = useNavigate();
 
   const { data } = useQuery({
-    queryKey: ["dashboard"],
+    queryKey: queryKeys.dashboard,
     queryFn: async () => {
       const res = await axiosInstance.get<DashboardData>(
         API_PATH.DASHBOARD.GET_DATA

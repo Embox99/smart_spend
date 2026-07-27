@@ -12,6 +12,7 @@ import AddIncomeForm, {
 import IncomeList from "../../components/income/IncomeList";
 import DeleteAlert from "../../components/DeleteAlert";
 import useTransactions, { buildParams } from "../../hooks/useTransactions";
+import { useInvalidateFinancials } from "../../hooks/useInvalidateFinancials";
 import downloadFile from "../../utils/download";
 
 const Income = () => {
@@ -23,9 +24,9 @@ const Income = () => {
     setFilter,
     clearFilters,
     setPage,
-    refresh,
   } = useTransactions<IncomeType>(API_PATH.INCOME.GET_ALL_INCOME);
 
+  const invalidate = useInvalidateFinancials();
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -46,7 +47,7 @@ const Income = () => {
       });
       setOpenAddIncomeModal(false);
       toast.success("Income added successfully");
-      refresh();
+      invalidate("income");
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to add income"));
     }
@@ -58,7 +59,7 @@ const Income = () => {
       await axiosInstance.delete(API_PATH.INCOME.DELETE_INCOME(deleteId));
       setDeleteId(null);
       toast.success("Income deleted successfully");
-      refresh();
+      invalidate("income");
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to delete income"));
     }

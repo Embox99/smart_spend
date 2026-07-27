@@ -12,6 +12,7 @@ import Modal from "../../components/Modal";
 import ExpenseList from "../../components/expense/ExpenseList";
 import DeleteAlert from "../../components/DeleteAlert";
 import useTransactions, { buildParams } from "../../hooks/useTransactions";
+import { useInvalidateFinancials } from "../../hooks/useInvalidateFinancials";
 import downloadFile from "../../utils/download";
 
 const Expense = () => {
@@ -23,9 +24,9 @@ const Expense = () => {
     setFilter,
     clearFilters,
     setPage,
-    refresh,
   } = useTransactions<ExpenseType>(API_PATH.EXPENSE.GET_ALL_EXPENSE);
 
+  const invalidate = useInvalidateFinancials();
   const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
@@ -46,7 +47,7 @@ const Expense = () => {
       });
       setOpenAddExpenseModal(false);
       toast.success("Expense added successfully");
-      refresh();
+      invalidate("expense");
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to add expense"));
     }
@@ -58,7 +59,7 @@ const Expense = () => {
       await axiosInstance.delete(API_PATH.EXPENSE.DELETE_EXPENSE(deleteId));
       setDeleteId(null);
       toast.success("Expense deleted successfully");
-      refresh();
+      invalidate("expense");
     } catch (err) {
       toast.error(apiErrorMessage(err, "Failed to delete expense"));
     }
