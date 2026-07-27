@@ -17,7 +17,7 @@ const LineTooltip = ({ active, payload }: ChartTooltipProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-2 border border-gray-200 dark:border-gray-700">
       <p className="text-xs font-semibold text-blue-700 dark:text-blue-400 mb-1">
-        {point.category ?? point.month}
+        {point.label}
       </p>
       <p className="text-sm text-gray-600 dark:text-gray-300">
         Amount:{" "}
@@ -45,7 +45,7 @@ export const CustomLineChart = ({ data }: { data: ChartPoint[] }) => {
           </defs>
           <CartesianGrid stroke="none" />
           <XAxis
-            dataKey="month"
+            dataKey="label"
             tick={{ fontSize: 12, fill: tickColor }}
             stroke="none"
           />

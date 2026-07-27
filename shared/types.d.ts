@@ -81,12 +81,28 @@ export interface Paginated<T> {
   pagination: Pagination;
 }
 
+/** One slice of a chart, already grouped server-side. */
+export interface CategoryTotal {
+  label: string;
+  amount: number;
+}
+
 export interface DashboardData {
   totalBalance: number;
   totalIncome: number;
   totalExpense: number;
-  last30DaysExpenses: { total: number; transactions: Expense[] };
-  last60DaysIncome: { total: number; transactions: Income[] };
+  last30DaysExpenses: {
+    total: number;
+    /** Grouped by category — one entry per category, not per transaction. */
+    byCategory: CategoryTotal[];
+  };
+  last60DaysIncome: {
+    total: number;
+    bySource: CategoryTotal[];
+  };
+  /** Feeds render a handful of rows, so only those are sent. */
+  recentExpenses: Expense[];
+  recentIncome: Income[];
   recentTransactions: RecentTransaction[];
 }
 

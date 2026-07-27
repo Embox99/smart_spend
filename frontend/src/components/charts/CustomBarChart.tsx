@@ -21,7 +21,7 @@ const BarTooltip = ({ active, payload }: ChartTooltipProps) => {
   return (
     <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg p-2 border border-gray-200 dark:border-gray-700">
       <p className="text-xs font-semibold text-purple-700 dark:text-purple-400 mb-1">
-        {point.category ?? point.month}
+        {point.label}
       </p>
       <p className="text-sm text-gray-600 dark:text-gray-300">
         Amount:{" "}
@@ -33,14 +33,7 @@ const BarTooltip = ({ active, payload }: ChartTooltipProps) => {
   );
 };
 
-interface CustomBarChartProps {
-  data: ChartPoint[];
-  /** Which field labels the x axis — income series are dated, expenses are
-   *  grouped by category. */
-  xKey?: "month" | "category";
-}
-
-const CustomBarChart = ({ data, xKey = "month" }: CustomBarChartProps) => {
+const CustomBarChart = ({ data }: { data: ChartPoint[] }) => {
   const { isDark } = useTheme();
   const tickColor = isDark ? "#9ca3af" : "#555";
 
@@ -50,7 +43,7 @@ const CustomBarChart = ({ data, xKey = "month" }: CustomBarChartProps) => {
         <BarChart data={data}>
           <CartesianGrid stroke="none" />
           <XAxis
-            dataKey={xKey}
+            dataKey="label"
             tick={{ fontSize: 12, fill: tickColor }}
             stroke="none"
           />

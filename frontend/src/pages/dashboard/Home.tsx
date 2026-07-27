@@ -32,8 +32,8 @@ const Home = () => {
   const totalBalance = data?.totalBalance ?? 0;
   const totalIncome = data?.totalIncome ?? 0;
   const totalExpense = data?.totalExpense ?? 0;
-  const last30DaysExpenses = data?.last30DaysExpenses?.transactions ?? [];
-  const last60DaysIncome = data?.last60DaysIncome?.transactions ?? [];
+  const expensesByCategory = data?.last30DaysExpenses?.byCategory ?? [];
+  const incomeBySource = data?.last60DaysIncome?.bySource ?? [];
 
   return (
     <DashboardLayout activeMenu="Dashboard">
@@ -69,16 +69,16 @@ const Home = () => {
             totalExpense={totalExpense}
           />
           <ExpenseTransaction
-            transactions={last30DaysExpenses}
+            transactions={data?.recentExpenses}
             onSeeMore={() => navigate("/expense")}
           />
-          <Last30DaysExpenses data={last30DaysExpenses} />
+          <Last30DaysExpenses data={expensesByCategory} />
           <RecentIncomeWithChart
-            data={last60DaysIncome.slice(0, 4)}
+            data={incomeBySource}
             totalIncome={totalIncome}
           />
           <RecentIncome
-            transactions={last60DaysIncome}
+            transactions={data?.recentIncome}
             onSeeMore={() => navigate("/income")}
           />
         </div>

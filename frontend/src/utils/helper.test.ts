@@ -3,7 +3,6 @@ import type { Expense } from "@shared/types";
 import {
   addThousandsSeparator,
   getInitials,
-  prepareExpenseBarChartData,
   prepareExpenseLineChartData,
   validateEmail,
 } from "./helper";
@@ -61,12 +60,12 @@ describe("addThousandsSeparator", () => {
 });
 
 describe("chart data preparation", () => {
-  it("keys expense bars by category", () => {
-    const points = prepareExpenseBarChartData([
-      expense({ category: "Rent", amount: 900 }),
+  it("labels each point with its formatted date", () => {
+    const points = prepareExpenseLineChartData([
+      expense({ date: "2024-03-05T00:00:00.000Z", amount: 900 }),
     ]);
 
-    expect(points).toEqual([{ category: "Rent", amount: 900 }]);
+    expect(points).toEqual([{ label: "5th Mar", amount: 900 }]);
   });
 
   it("sorts the line series oldest first", () => {

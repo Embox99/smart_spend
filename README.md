@@ -228,7 +228,7 @@ budget by that margin.
 
 | Method | Path | Notes |
 | ------ | ------------ | -------------------------------------------------- |
-| GET | `/dashboard` | Totals, last 30 days of expenses, last 60 days of income, 10 most recent transactions |
+| GET | `/dashboard` | Totals, 30-day expense spend grouped by category, 60-day income grouped by source, and the 10 most recent transactions across both ledgers |
 
 ### Other
 

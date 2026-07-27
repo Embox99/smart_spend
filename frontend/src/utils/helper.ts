@@ -1,5 +1,6 @@
 import { format, parseISO } from "date-fns";
 import type { Expense, Income } from "@shared/types";
+import type { ChartPoint } from "../components/charts/chartTypes";
 
 export const validateEmail = (email: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -42,35 +43,19 @@ const byDateAscending = <T extends { date: string }>(items: T[]): T[] =>
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-export interface CategoryChartPoint {
-  category: string;
-  amount: number;
-}
-
-export interface DatedChartPoint {
-  month: string;
-  amount: number;
-  category?: string;
-}
-
-export const prepareExpenseBarChartData = (
-  data: Expense[] = []
-): CategoryChartPoint[] =>
-  data.map((item) => ({ category: item.category, amount: item.amount }));
-
+/** Dated series for the paginated Income and Expense pages. */
 export const prepareIncomeBarChartData = (
   data: Income[] = []
-): DatedChartPoint[] =>
+): ChartPoint[] =>
   byDateAscending(data).map((item) => ({
-    month: formatDate(item.date),
+    label: formatDate(item.date),
     amount: item.amount,
   }));
 
 export const prepareExpenseLineChartData = (
   data: Expense[] = []
-): DatedChartPoint[] =>
+): ChartPoint[] =>
   byDateAscending(data).map((item) => ({
-    month: formatDate(item.date),
+    label: formatDate(item.date),
     amount: item.amount,
-    category: item.category,
   }));
