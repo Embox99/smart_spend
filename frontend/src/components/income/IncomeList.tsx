@@ -66,6 +66,7 @@ const IncomeList = ({
             key={income._id}
             title={income.source}
             icon={income.icon}
+            note={income.note}
             date={formatFullDate(income.date)}
             amount={income.amount}
             type="income"

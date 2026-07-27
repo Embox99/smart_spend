@@ -24,6 +24,8 @@ support.
 **Transactions**
 
 - Add, edit, view, and delete income and expense records with emoji icons
+- Optional free-text note on every record, matched by search
+- Optional free-text note on every record, matched by search
 - Debounced search and multi-field filters — by date range, amount, and category/source
 - Paginated lists (20 per page) with server-side sorting
 - Export filtered results to Excel (.xlsx), capped at 10k rows
@@ -219,7 +221,7 @@ pass `Authorization: Bearer <token>` instead.
 
 | Method | Path | Notes |
 | ------ | ---------------------------- | ------------------------------------------ |
-| POST | `/:kind/add` | `source`/`category`, `amount`, `date`, `icon?` |
+| POST | `/:kind/add` | `source`/`category`, `amount`, `date`, `icon?`, `note?` (≤ 280 chars) |
 | GET | `/:kind/get` | Paginated, filterable — see below |
 | PUT | `/:kind/:id` | Same body as create; owner only, 404 otherwise |
 | DELETE | `/:kind/:id` | Owner only; 404 otherwise |
@@ -229,7 +231,7 @@ Query params for `get` and `downloadexcel`:
 
 | Param | Type | Default | Notes |
 | ----------- | ------------------ | ------- | ---------------------------- |
-| `search` | string | — | Case-insensitive, regex-escaped |
+| `search` | string | — | Case-insensitive, regex-escaped; matches the category/source **and** the note |
 | `from`,`to` | `YYYY-MM-DD` | — | Inclusive on both ends |
 | `minAmount`, `maxAmount` | number | — | Inclusive |
 | `sortBy` | `date` \| `amount` | `date` | Anything else is ignored |

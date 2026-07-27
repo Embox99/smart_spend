@@ -34,6 +34,7 @@ describe("toExpenseFormValues", () => {
       amount: "7.5",
       date: "2024-03-15",
       icon: "https://cdn.example.com/i.png",
+      note: "",
     });
   });
 
@@ -68,6 +69,37 @@ describe("ExpenseForm", () => {
     expect(
       screen.getByRole("button", { name: "Save Changes" })
     ).toBeInTheDocument();
+  });
+
+  it("pre-fills the note and reports the remaining length", () => {
+    renderForm({
+      initialValues: toExpenseFormValues({ ...expense, note: "birthday cake" }),
+    });
+
+    expect(screen.getByLabelText<HTMLTextAreaElement>(/note/i).value).toBe(
+      "birthday cake"
+    );
+    expect(screen.getByText("13/280")).toBeInTheDocument();
+  });
+
+  it("leaves the note blank when the record has none", () => {
+    renderForm({ initialValues: toExpenseFormValues(expense) });
+
+    expect(screen.getByLabelText<HTMLTextAreaElement>(/note/i).value).toBe("");
+  });
+
+  it("submits the note along with the rest", async () => {
+    const { onSubmit } = renderForm();
+
+    await userEvent.type(
+      screen.getByLabelText<HTMLTextAreaElement>(/note/i),
+      "lunch with Dana"
+    );
+    await userEvent.click(screen.getByRole("button", { name: "Add Expense" }));
+
+    expect(onSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({ note: "lunch with Dana" })
+    );
   });
 
   it("submits the edited values", async () => {

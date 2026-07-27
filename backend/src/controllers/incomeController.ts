@@ -11,7 +11,7 @@ const EXPORT_LIMIT = 10000;
 
 // POST /api/v1/income/add
 export const addIncome = asyncHandler(async (req, res) => {
-  const { icon, source, amount, date } = req.body as IncomeInput;
+  const { icon, source, amount, date, note } = req.body as IncomeInput;
 
   const income = await Income.create({
     userId: req.user?._id,
@@ -19,6 +19,7 @@ export const addIncome = asyncHandler(async (req, res) => {
     source,
     amount,
     date,
+    note,
   });
 
   res.status(201).json(income);
@@ -42,13 +43,13 @@ export const getAllIncome = asyncHandler(async (req, res) => {
 
 // PUT /api/v1/income/:id
 export const updateIncome = asyncHandler(async (req, res) => {
-  const { icon, source, amount, date } = req.body as IncomeInput;
+  const { icon, source, amount, date, note } = req.body as IncomeInput;
 
   // Scoped by userId so a valid id belonging to someone else 404s rather
   // than being rewritten.
   const income = await Income.findOneAndUpdate(
     { _id: req.params.id, userId: req.user?._id },
-    { $set: { icon: icon ?? null, source, amount, date } },
+    { $set: { icon: icon ?? null, source, amount, date, note: note ?? null } },
     { new: true, runValidators: true }
   );
 
@@ -96,11 +97,13 @@ export const downloadIncomeExcel = asyncHandler(async (req, res) => {
         width: 14,
         style: { numFmt: "dd/mm/yyyy" },
       },
+      { header: "Note", key: "note", width: 40 },
     ],
     rows: incomes.map((i) => ({
       source: i.source,
       amount: toMajorUnits(i.amount),
       date: new Date(i.date),
+      note: i.note ?? "",
     })),
   });
 });

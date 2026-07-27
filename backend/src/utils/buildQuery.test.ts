@@ -47,11 +47,10 @@ describe("buildQuery", () => {
 
   it("escapes regex metacharacters in the search term", () => {
     const { filter } = build({ search: "(a+)+$" });
+    const pattern = { $regex: "\\(a\\+\\)\\+\\$", $options: "i" };
 
-    expect(filter.category).toEqual({
-      $regex: "\\(a\\+\\)\\+\\$",
-      $options: "i",
-    });
+    // Search spans the labelled field and the free-text note.
+    expect(filter.$or).toEqual([{ category: pattern }, { note: pattern }]);
   });
 
   it("ignores a sort field that is not whitelisted", () => {

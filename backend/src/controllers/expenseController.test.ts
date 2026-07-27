@@ -122,6 +122,99 @@ describe("expenses", () => {
     expect(byDate.body.data).toHaveLength(1);
   });
 
+  it("stores a note and trims it", async () => {
+    const res = await addExpense(user, {
+      category: "Groceries",
+      amount: 20,
+      date: "2024-03-15",
+      note: "  weekly shop at the market  ",
+    }).expect(201);
+
+    expect(res.body.note).toBe("weekly shop at the market");
+  });
+
+  it("treats a blank note as absent", async () => {
+    const res = await addExpense(user, {
+      category: "Groceries",
+      amount: 20,
+      date: "2024-03-15",
+      note: "   ",
+    }).expect(201);
+
+    expect(res.body.note).toBeUndefined();
+  });
+
+  it("rejects a note over the length limit", async () => {
+    await addExpense(user, {
+      category: "Groceries",
+      amount: 20,
+      date: "2024-03-15",
+      note: "x".repeat(281),
+    }).expect(400);
+  });
+
+  it("matches the search term against the note as well as the category", async () => {
+    await addExpense(user, {
+      category: "Groceries",
+      amount: 20,
+      date: "2024-03-15",
+      note: "birthday cake for Dana",
+    });
+    await addExpense(user, {
+      category: "Transport",
+      amount: 5,
+      date: "2024-03-15",
+    });
+
+    const byNote = await request(app)
+      .get(`${ENDPOINT}/get?search=birthday`)
+      .set("Cookie", user.cookies)
+      .expect(200);
+    expect(byNote.body.data).toHaveLength(1);
+    expect(byNote.body.data[0].category).toBe("Groceries");
+
+    const byCategory = await request(app)
+      .get(`${ENDPOINT}/get?search=transport`)
+      .set("Cookie", user.cookies)
+      .expect(200);
+    expect(byCategory.body.data).toHaveLength(1);
+  });
+
+  it("keeps the owner scope when searching notes", async () => {
+    const other = await createUser();
+    await addExpense(other, {
+      category: "Theirs",
+      amount: 10,
+      date: "2024-03-15",
+      note: "birthday cake",
+    });
+
+    // The $or for search must not widen past the userId filter.
+    const res = await request(app)
+      .get(`${ENDPOINT}/get?search=birthday`)
+      .set("Cookie", user.cookies)
+      .expect(200);
+
+    expect(res.body.data).toHaveLength(0);
+  });
+
+  it("clears the note when an update omits it", async () => {
+    const created = await addExpense(user, {
+      category: "Groceries",
+      amount: 20,
+      date: "2024-03-15",
+      note: "to be removed",
+    });
+
+    const res = await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Cookie", user.cookies)
+      .send({ category: "Groceries", amount: 20, date: "2024-03-15" })
+      .expect(200);
+
+    expect(res.body.note ?? null).toBeNull();
+  });
+
   it("never leaks another user's expenses", async () => {
     const other = await createUser();
     await addExpense(other, {

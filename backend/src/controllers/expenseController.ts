@@ -11,7 +11,7 @@ const EXPORT_LIMIT = 10000;
 
 // POST /api/v1/expense/add
 export const addExpense = asyncHandler(async (req, res) => {
-  const { icon, category, amount, date } = req.body as ExpenseInput;
+  const { icon, category, amount, date, note } = req.body as ExpenseInput;
 
   const expense = await Expense.create({
     userId: req.user?._id,
@@ -19,6 +19,7 @@ export const addExpense = asyncHandler(async (req, res) => {
     category,
     amount,
     date,
+    note,
   });
 
   res.status(201).json(expense);
@@ -42,13 +43,13 @@ export const getAllExpense = asyncHandler(async (req, res) => {
 
 // PUT /api/v1/expense/:id
 export const updateExpense = asyncHandler(async (req, res) => {
-  const { icon, category, amount, date } = req.body as ExpenseInput;
+  const { icon, category, amount, date, note } = req.body as ExpenseInput;
 
   // Scoped by userId so a valid id belonging to someone else 404s rather
   // than being rewritten.
   const expense = await Expense.findOneAndUpdate(
     { _id: req.params.id, userId: req.user?._id },
-    { $set: { icon: icon ?? null, category, amount, date } },
+    { $set: { icon: icon ?? null, category, amount, date, note: note ?? null } },
     { new: true, runValidators: true }
   );
 
@@ -96,11 +97,13 @@ export const downloadExpenseExcel = asyncHandler(async (req, res) => {
         width: 14,
         style: { numFmt: "dd/mm/yyyy" },
       },
+      { header: "Note", key: "note", width: 40 },
     ],
     rows: expenses.map((e) => ({
       category: e.category,
       amount: toMajorUnits(e.amount),
       date: new Date(e.date),
+      note: e.note ?? "",
     })),
   });
 });

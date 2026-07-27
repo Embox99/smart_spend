@@ -7,6 +7,8 @@ export interface ExpenseDocument extends Document {
   category: string;
   /** Integer minor units — see utils/money.ts. */
   amount: number;
+  /** Free-text detail; also matched by search. */
+  note?: string;
   date: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -19,6 +21,7 @@ const ExpenseSchema = new Schema<ExpenseDocument>(
     category: { type: String, required: true },
     // Integer minor units — see utils/money.ts.
     amount: { type: Number, required: true, min: 1 },
+    note: { type: String, trim: true, maxlength: 280 },
     date: { type: Date, default: Date.now },
   },
   { timestamps: true }

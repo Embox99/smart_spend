@@ -24,6 +24,14 @@ const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Malformed identifier");
 
 const icon = z.string().max(2048).nullish();
 
+// Empty strings arrive from a cleared textarea; store them as absent.
+const note = z
+  .string()
+  .trim()
+  .max(280, "Note must be 280 characters or fewer")
+  .optional()
+  .transform((value) => value || undefined);
+
 export const registerSchema = z.object({
   fullName: z.string().trim().min(1, "Name is required").max(80),
   email: z.email("Please enter a valid email address").trim().toLowerCase(),
@@ -41,6 +49,7 @@ export const expenseSchema = z.object({
   amount: positiveAmount,
   date: isoDate,
   icon,
+  note,
 });
 
 export const incomeSchema = z.object({
@@ -48,6 +57,7 @@ export const incomeSchema = z.object({
   amount: positiveAmount,
   date: isoDate,
   icon,
+  note,
 });
 
 export const budgetSchema = z.object({

@@ -39,14 +39,14 @@ const Income = () => {
   };
 
   const handleSubmit = async (values: IncomeFormValues) => {
-    const { source, amount, date, icon } = values;
+    const { source, amount, date, icon, note } = values;
     if (!source.trim()) return toast.error("Source is required");
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       return toast.error("Amount must be a positive number");
     }
     if (!date) return toast.error("Date is required");
 
-    const payload = { source, amount: Number(amount), date, icon };
+    const payload = { source, amount: Number(amount), date, icon, note };
 
     try {
       if (editing) {

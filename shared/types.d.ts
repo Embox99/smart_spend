@@ -36,6 +36,8 @@ interface TransactionBase {
    * integer so sums stay exact; format for display, never for arithmetic.
    */
   amount: number;
+  /** Free-text detail; also matched by search. */
+  note?: string;
   date: string;
   createdAt: string;
   updatedAt: string;

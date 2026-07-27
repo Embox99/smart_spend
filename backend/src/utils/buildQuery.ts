@@ -73,10 +73,11 @@ const buildQuery = <T>(
   if (!isNaN(max)) amountRange.$lte = toMinorUnits(max);
   if (Object.keys(amountRange).length) filter.amount = amountRange;
 
-  // ── text search on category / source ─────────────────────────────────────
+  // ── text search on category / source and the note ────────────────────────
   // Escaped so a crafted pattern like "(a+)+$" cannot stall the server.
   if (search && search.trim()) {
-    filter[textField] = { $regex: escapeRegex(search.trim()), $options: "i" };
+    const pattern = { $regex: escapeRegex(search.trim()), $options: "i" };
+    filter.$or = [{ [textField]: pattern }, { note: pattern }];
   }
 
   // ── sort ──────────────────────────────────────────────────────────────────

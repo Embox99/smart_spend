@@ -65,6 +65,7 @@ const ExpenseList = ({
           key={expense._id}
           title={expense.category}
           icon={expense.icon}
+          note={expense.note}
           date={formatFullDate(expense.date)}
           amount={expense.amount}
           type="expense"

@@ -10,6 +10,7 @@ import { formatAmount } from "../../utils/money";
 interface TransactionInfoCardProps {
   title: string;
   icon?: string | null;
+  note?: string;
   date: string;
   amount: number;
   type: "income" | "expense";
@@ -25,6 +26,7 @@ const actionClass = `text-gray-400 opacity-0 group-hover:opacity-100
 const TransactionInfoCard = ({
   title,
   icon,
+  note,
   date,
   amount,
   type,
@@ -52,6 +54,11 @@ const TransactionInfoCard = ({
           <p className="text-sm text-gray-700 dark:text-gray-200 font-medium">
             {title}
           </p>
+          {note && (
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 line-clamp-2 max-w-md">
+              {note}
+            </p>
+          )}
           <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{date}</p>
         </div>
         <div className="flex items-center gap-2">

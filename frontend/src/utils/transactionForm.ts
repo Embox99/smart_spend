@@ -2,11 +2,14 @@ import type { Expense, Income } from "@shared/types";
 import { toMajorUnits } from "./money";
 
 /** Form state is all strings — the inputs are uncontrolled by type. */
+export const NOTE_MAX_LENGTH = 280;
+
 export interface ExpenseFormValues {
   category: string;
   amount: string;
   date: string;
   icon: string;
+  note: string;
 }
 
 export interface IncomeFormValues {
@@ -14,6 +17,7 @@ export interface IncomeFormValues {
   amount: string;
   date: string;
   icon: string;
+  note: string;
 }
 
 export const EMPTY_EXPENSE_FORM: ExpenseFormValues = {
@@ -21,6 +25,7 @@ export const EMPTY_EXPENSE_FORM: ExpenseFormValues = {
   amount: "",
   date: "",
   icon: "",
+  note: "",
 };
 
 export const EMPTY_INCOME_FORM: IncomeFormValues = {
@@ -28,6 +33,7 @@ export const EMPTY_INCOME_FORM: IncomeFormValues = {
   amount: "",
   date: "",
   icon: "",
+  note: "",
 };
 
 /**
@@ -39,6 +45,7 @@ export const toExpenseFormValues = (expense: Expense): ExpenseFormValues => ({
   amount: String(toMajorUnits(expense.amount)),
   date: expense.date.slice(0, 10),
   icon: expense.icon ?? "",
+  note: expense.note ?? "",
 });
 
 export const toIncomeFormValues = (income: Income): IncomeFormValues => ({
@@ -46,4 +53,5 @@ export const toIncomeFormValues = (income: Income): IncomeFormValues => ({
   amount: String(toMajorUnits(income.amount)),
   date: income.date.slice(0, 10),
   icon: income.icon ?? "",
+  note: income.note ?? "",
 });
