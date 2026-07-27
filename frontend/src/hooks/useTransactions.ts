@@ -53,18 +53,24 @@ const useTransactions = <T>(endpoint: string): UseTransactionsResult<T> => {
   const [filters, setFilters] = useState<TransactionFilters>(EMPTY_FILTERS);
   const [page, setPage] = useState(1);
 
-  // Typing in the search box should not fire a request per keystroke.
-  const [debouncedFilters, setDebouncedFilters] =
-    useState<TransactionFilters>(EMPTY_FILTERS);
+  // Only the search box needs debouncing — it fires per keystroke. Picking a
+  // date or changing the sort is a single deliberate act and should apply at
+  // once, so those bypass the delay.
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedFilters(filters), DEBOUNCE_MS);
+    const timer = setTimeout(() => setDebouncedSearch(filters.search), DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [filters]);
+  }, [filters.search]);
+
+  const effectiveFilters = useMemo(
+    () => ({ ...filters, search: debouncedSearch }),
+    [filters, debouncedSearch]
+  );
 
   const { data, isFetching } = useQuery({
-    queryKey: [endpoint, debouncedFilters, page],
+    queryKey: [endpoint, effectiveFilters, page],
     queryFn: async () => {
-      const params = buildParams(debouncedFilters, page);
+      const params = buildParams(effectiveFilters, page);
       const res = await axiosInstance.get<Paginated<T>>(
         `${endpoint}?${params.toString()}`
       );
