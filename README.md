@@ -25,7 +25,6 @@ support.
 
 - Add, edit, view, and delete income and expense records with emoji icons
 - Optional free-text note on every record, matched by search
-- Optional free-text note on every record, matched by search
 - Debounced search and multi-field filters — by date range, amount, and category/source
 - Paginated lists (20 per page) with server-side sorting
 - Export filtered results to Excel (.xlsx), capped at 10k rows
@@ -50,7 +49,7 @@ support.
 - Amounts formatted in the currency chosen on the profile page
 - Dark mode with system preference detection, applied before first paint
 - Responsive layout, skeleton loaders, accessible dialogs (focus trap, Escape)
-- Protected routes that check token expiry, not just its presence
+- Protected routes that check session expiry, not just its presence
 - Route-level code splitting
 
 **Security**
