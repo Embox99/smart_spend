@@ -6,9 +6,11 @@ import IncomeOverview from "../../components/income/IncomeOverview";
 import axiosInstance, { apiErrorMessage } from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import Modal from "../../components/Modal";
-import AddIncomeForm, {
+import IncomeForm from "../../components/income/IncomeForm";
+import {
+  toIncomeFormValues,
   type IncomeFormValues,
-} from "../../components/income/AddIncomeForm";
+} from "../../utils/transactionForm";
 import IncomeList from "../../components/income/IncomeList";
 import DeleteAlert from "../../components/DeleteAlert";
 import useTransactions, { buildParams } from "../../hooks/useTransactions";
@@ -27,29 +29,41 @@ const Income = () => {
   } = useTransactions<IncomeType>(API_PATH.INCOME.GET_ALL_INCOME);
 
   const invalidate = useInvalidateFinancials();
-  const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editing, setEditing] = useState<IncomeType | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleAddIncome = async (income: IncomeFormValues) => {
-    const { source, amount, date, icon } = income;
+  const closeForm = () => {
+    setIsCreating(false);
+    setEditing(null);
+  };
+
+  const handleSubmit = async (values: IncomeFormValues) => {
+    const { source, amount, date, icon } = values;
     if (!source.trim()) return toast.error("Source is required");
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       return toast.error("Amount must be a positive number");
     }
     if (!date) return toast.error("Date is required");
 
+    const payload = { source, amount: Number(amount), date, icon };
+
     try {
-      await axiosInstance.post(API_PATH.INCOME.ADD_INCOME, {
-        source,
-        amount: Number(amount),
-        date,
-        icon,
-      });
-      setOpenAddIncomeModal(false);
-      toast.success("Income added successfully");
+      if (editing) {
+        await axiosInstance.put(
+          API_PATH.INCOME.UPDATE_INCOME(editing._id),
+          payload
+        );
+      } else {
+        await axiosInstance.post(API_PATH.INCOME.ADD_INCOME, payload);
+      }
+      toast.success(editing ? "Income updated" : "Income added successfully");
+      closeForm();
       invalidate("income");
     } catch (err) {
-      toast.error(apiErrorMessage(err, "Failed to add income"));
+      toast.error(
+        apiErrorMessage(err, `Failed to ${editing ? "update" : "add"} income`)
+      );
     }
   };
 
@@ -82,7 +96,7 @@ const Income = () => {
         <div className="grid grid-cols-1 gap-6">
           <IncomeOverview
             transactions={incomeData}
-            onAddIncome={() => setOpenAddIncomeModal(true)}
+            onAddIncome={() => setIsCreating(true)}
           />
           <IncomeList
             transactions={incomeData}
@@ -92,17 +106,26 @@ const Income = () => {
             onFilterChange={setFilter}
             onFilterClear={clearFilters}
             onPageChange={setPage}
+            onEdit={(id) =>
+              setEditing(incomeData.find((i) => i._id === id) ?? null)
+            }
             onDelete={setDeleteId}
             onDownload={handleDownload}
           />
         </div>
 
         <Modal
-          isOpen={openAddIncomeModal}
-          onClose={() => setOpenAddIncomeModal(false)}
-          title="Add Income"
+          isOpen={isCreating || editing !== null}
+          onClose={closeForm}
+          title={editing ? "Edit Income" : "Add Income"}
         >
-          <AddIncomeForm onAddIncome={handleAddIncome} />
+          {/* Keyed so switching records remounts the form with fresh state. */}
+          <IncomeForm
+            key={editing?._id ?? "new"}
+            onSubmit={handleSubmit}
+            initialValues={editing ? toIncomeFormValues(editing) : undefined}
+            submitLabel={editing ? "Save Changes" : "Add Income"}
+          />
         </Modal>
 
         <Modal

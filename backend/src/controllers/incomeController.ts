@@ -39,6 +39,23 @@ export const getAllIncome = asyncHandler(async (req, res) => {
   res.json({ data, pagination: buildPagination(total, page, limit) });
 });
 
+// PUT /api/v1/income/:id
+export const updateIncome = asyncHandler(async (req, res) => {
+  const { icon, source, amount, date } = req.body as IncomeInput;
+
+  // Scoped by userId so a valid id belonging to someone else 404s rather
+  // than being rewritten.
+  const income = await Income.findOneAndUpdate(
+    { _id: req.params.id, userId: req.user?._id },
+    { $set: { icon: icon ?? null, source, amount, date } },
+    { new: true, runValidators: true }
+  );
+
+  if (!income) throw AppError.notFound("Income not found");
+
+  res.json(income);
+});
+
 // DELETE /api/v1/income/:id
 export const deleteIncome = asyncHandler(async (req, res) => {
   const income = await Income.findOneAndDelete({

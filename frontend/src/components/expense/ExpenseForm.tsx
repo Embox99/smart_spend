@@ -1,27 +1,26 @@
 import { useState } from "react";
 import Input from "../inputs/input";
 import EmojiPickerPopup from "../EmojiPickerPopup";
+import {
+  EMPTY_EXPENSE_FORM,
+  type ExpenseFormValues,
+} from "../../utils/transactionForm";
 
-export interface ExpenseFormValues {
-  category: string;
-  amount: string;
-  date: string;
-  icon: string;
+interface ExpenseFormProps {
+  onSubmit: (expense: ExpenseFormValues) => void;
+  /** Present when editing an existing record. */
+  initialValues?: ExpenseFormValues;
+  submitLabel?: string;
 }
 
-const EMPTY: ExpenseFormValues = {
-  category: "",
-  amount: "",
-  date: "",
-  icon: "",
-};
-
-interface AddExpenseFormProps {
-  onAddExpense: (expense: ExpenseFormValues) => void;
-}
-
-const AddExpenseForm = ({ onAddExpense }: AddExpenseFormProps) => {
-  const [form, setForm] = useState<ExpenseFormValues>(EMPTY);
+const ExpenseForm = ({
+  onSubmit,
+  initialValues,
+  submitLabel = "Add Expense",
+}: ExpenseFormProps) => {
+  const [form, setForm] = useState<ExpenseFormValues>(
+    initialValues ?? EMPTY_EXPENSE_FORM
+  );
 
   const set = <K extends keyof ExpenseFormValues>(
     key: K,
@@ -57,13 +56,13 @@ const AddExpenseForm = ({ onAddExpense }: AddExpenseFormProps) => {
         <button
           className="add-btn add-btn-fill"
           type="button"
-          onClick={() => onAddExpense(form)}
+          onClick={() => onSubmit(form)}
         >
-          Add Expense
+          {submitLabel}
         </button>
       </div>
     </div>
   );
 };
 
-export default AddExpenseForm;
+export default ExpenseForm;

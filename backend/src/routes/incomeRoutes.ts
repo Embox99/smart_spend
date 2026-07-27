@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addIncome,
   getAllIncome,
+  updateIncome,
   deleteIncome,
   downloadIncomeExcel,
 } from "../controllers/incomeController";
@@ -16,6 +17,12 @@ router.use(protect);
 router.post("/add", validate(incomeSchema), addIncome);
 router.get("/get", getAllIncome);
 router.get("/downloadexcel", downloadIncomeExcel);
+router.put(
+  "/:id",
+  validate(idParamSchema, "params"),
+  validate(incomeSchema),
+  updateIncome
+);
 router.delete("/:id", validate(idParamSchema, "params"), deleteIncome);
 
 export default router;

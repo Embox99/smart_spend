@@ -2,6 +2,7 @@ import {
   LuUtensils,
   LuTrendingUp,
   LuTrendingDown,
+  LuPencil,
   LuTrash2,
 } from "react-icons/lu";
 
@@ -11,9 +12,14 @@ interface TransactionInfoCardProps {
   date: string;
   amount: number;
   type: "income" | "expense";
+  /** Hides both row actions — used by the read-only dashboard feeds. */
   hideDeleteBtn?: boolean;
+  onEdit?: () => void;
   onDelete?: () => void;
 }
+
+const actionClass = `text-gray-400 opacity-0 group-hover:opacity-100
+  focus-visible:opacity-100 transition-opacity cursor-pointer`;
 
 const TransactionInfoCard = ({
   title,
@@ -22,6 +28,7 @@ const TransactionInfoCard = ({
   amount,
   type,
   hideDeleteBtn,
+  onEdit,
   onDelete,
 }: TransactionInfoCardProps) => {
   const amountStyles =
@@ -48,14 +55,26 @@ const TransactionInfoCard = ({
         </div>
         <div className="flex items-center gap-2">
           {!hideDeleteBtn && (
-            <button
-              type="button"
-              aria-label={`Delete ${title}`}
-              className="text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity cursor-pointer"
-              onClick={onDelete}
-            >
-              <LuTrash2 size={18} />
-            </button>
+            <>
+              {onEdit && (
+                <button
+                  type="button"
+                  aria-label={`Edit ${title}`}
+                  className={`${actionClass} hover:text-violet-500 dark:hover:text-violet-400`}
+                  onClick={onEdit}
+                >
+                  <LuPencil size={17} />
+                </button>
+              )}
+              <button
+                type="button"
+                aria-label={`Delete ${title}`}
+                className={`${actionClass} hover:text-red-500 dark:hover:text-red-400`}
+                onClick={onDelete}
+              >
+                <LuTrash2 size={18} />
+              </button>
+            </>
           )}
           <div
             className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${amountStyles}`}

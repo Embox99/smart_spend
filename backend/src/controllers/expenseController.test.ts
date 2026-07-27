@@ -138,6 +138,73 @@ describe("expenses", () => {
     expect(res.body.data).toHaveLength(0);
   });
 
+  it("updates an expense in place", async () => {
+    const created = await addExpense(user, {
+      category: "Cofee",
+      amount: 5,
+      date: "2024-03-15",
+    });
+
+    const res = await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Authorization", auth(user.token))
+      .send({ category: "Coffee", amount: 7.5, date: "2024-03-16" })
+      .expect(200);
+
+    expect(res.body._id).toBe(created.body._id);
+    expect(res.body.category).toBe("Coffee");
+    expect(res.body.amount).toBe(7.5);
+    expect(res.body.date).toContain("2024-03-16");
+
+    // The change is persisted, not just echoed back.
+    const list = await request(app)
+      .get(`${ENDPOINT}/get`)
+      .set("Authorization", auth(user.token));
+    expect(list.body.data).toHaveLength(1);
+    expect(list.body.data[0].category).toBe("Coffee");
+  });
+
+  it("validates the update body the same way as creation", async () => {
+    const created = await addExpense(user, {
+      category: "Coffee",
+      amount: 5,
+      date: "2024-03-15",
+    });
+
+    await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Authorization", auth(user.token))
+      .send({ category: "Coffee", amount: -1, date: "2024-03-15" })
+      .expect(400);
+
+    await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Authorization", auth(user.token))
+      .send({ category: "", amount: 5, date: "2024-03-15" })
+      .expect(400);
+  });
+
+  it("refuses to update an expense owned by someone else", async () => {
+    const other = await createUser();
+    const created = await addExpense(other, {
+      category: "Theirs",
+      amount: 10,
+      date: "2024-03-15",
+    });
+
+    await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Authorization", auth(user.token))
+      .send({ category: "Mine now", amount: 1, date: "2024-03-15" })
+      .expect(404);
+
+    // And the record is untouched.
+    const list = await request(app)
+      .get(`${ENDPOINT}/get`)
+      .set("Authorization", auth(other.token));
+    expect(list.body.data[0].category).toBe("Theirs");
+  });
+
   it("refuses to delete an expense owned by someone else", async () => {
     const other = await createUser();
     const created = await addExpense(other, {

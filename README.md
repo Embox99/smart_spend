@@ -23,7 +23,7 @@ support.
 
 **Transactions**
 
-- Add, view, and delete income and expense records with emoji icons
+- Add, edit, view, and delete income and expense records with emoji icons
 - Debounced search and multi-field filters — by date range, amount, and category/source
 - Paginated lists (20 per page) with server-side sorting
 - Export filtered results to Excel (.xlsx), capped at 10k rows
@@ -195,6 +195,7 @@ requires `Authorization: Bearer <token>`.
 | ------ | ---------------------------- | ------------------------------------------ |
 | POST | `/:kind/add` | `source`/`category`, `amount`, `date`, `icon?` |
 | GET | `/:kind/get` | Paginated, filterable — see below |
+| PUT | `/:kind/:id` | Same body as create; owner only, 404 otherwise |
 | DELETE | `/:kind/:id` | Owner only; 404 otherwise |
 | GET | `/:kind/downloadexcel` | Same filters, returns .xlsx |
 

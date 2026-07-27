@@ -14,6 +14,7 @@ interface IncomeListProps {
   onFilterChange: UseTransactionsResult<Income>["setFilter"];
   onFilterClear: () => void;
   onPageChange: (page: number) => void;
+  onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onDownload: () => void;
 }
@@ -26,6 +27,7 @@ const IncomeList = ({
   onFilterChange,
   onFilterClear,
   onPageChange,
+  onEdit,
   onDelete,
   onDownload,
 }: IncomeListProps) => (
@@ -67,6 +69,7 @@ const IncomeList = ({
             date={formatFullDate(income.date)}
             amount={income.amount}
             type="income"
+            onEdit={() => onEdit(income._id)}
             onDelete={() => onDelete(income._id)}
           />
         ))}

@@ -39,6 +39,23 @@ export const getAllExpense = asyncHandler(async (req, res) => {
   res.json({ data, pagination: buildPagination(total, page, limit) });
 });
 
+// PUT /api/v1/expense/:id
+export const updateExpense = asyncHandler(async (req, res) => {
+  const { icon, category, amount, date } = req.body as ExpenseInput;
+
+  // Scoped by userId so a valid id belonging to someone else 404s rather
+  // than being rewritten.
+  const expense = await Expense.findOneAndUpdate(
+    { _id: req.params.id, userId: req.user?._id },
+    { $set: { icon: icon ?? null, category, amount, date } },
+    { new: true, runValidators: true }
+  );
+
+  if (!expense) throw AppError.notFound("Expense not found");
+
+  res.json(expense);
+});
+
 // DELETE /api/v1/expense/:id
 export const deleteExpense = asyncHandler(async (req, res) => {
   const expense = await Expense.findOneAndDelete({

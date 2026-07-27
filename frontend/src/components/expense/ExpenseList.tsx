@@ -14,6 +14,7 @@ interface ExpenseListProps {
   onFilterChange: UseTransactionsResult<Expense>["setFilter"];
   onFilterClear: () => void;
   onPageChange: (page: number) => void;
+  onEdit: (id: string) => void;
   onDelete: (id: string) => void;
   onDownload: () => void;
 }
@@ -26,6 +27,7 @@ const ExpenseList = ({
   onFilterChange,
   onFilterClear,
   onPageChange,
+  onEdit,
   onDelete,
   onDownload,
 }: ExpenseListProps) => (
@@ -66,6 +68,7 @@ const ExpenseList = ({
           date={formatFullDate(expense.date)}
           amount={expense.amount}
           type="expense"
+          onEdit={() => onEdit(expense._id)}
           onDelete={() => onDelete(expense._id)}
         />
       ))

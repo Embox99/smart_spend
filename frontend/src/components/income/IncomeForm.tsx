@@ -1,22 +1,26 @@
 import { useState } from "react";
 import Input from "../inputs/input";
 import EmojiPickerPopup from "../EmojiPickerPopup";
+import {
+  EMPTY_INCOME_FORM,
+  type IncomeFormValues,
+} from "../../utils/transactionForm";
 
-export interface IncomeFormValues {
-  source: string;
-  amount: string;
-  date: string;
-  icon: string;
+interface IncomeFormProps {
+  onSubmit: (income: IncomeFormValues) => void;
+  /** Present when editing an existing record. */
+  initialValues?: IncomeFormValues;
+  submitLabel?: string;
 }
 
-const EMPTY: IncomeFormValues = { source: "", amount: "", date: "", icon: "" };
-
-interface AddIncomeFormProps {
-  onAddIncome: (income: IncomeFormValues) => void;
-}
-
-const AddIncomeForm = ({ onAddIncome }: AddIncomeFormProps) => {
-  const [form, setForm] = useState<IncomeFormValues>(EMPTY);
+const IncomeForm = ({
+  onSubmit,
+  initialValues,
+  submitLabel = "Add Income",
+}: IncomeFormProps) => {
+  const [form, setForm] = useState<IncomeFormValues>(
+    initialValues ?? EMPTY_INCOME_FORM
+  );
 
   const set = <K extends keyof IncomeFormValues>(
     key: K,
@@ -52,13 +56,13 @@ const AddIncomeForm = ({ onAddIncome }: AddIncomeFormProps) => {
         <button
           type="button"
           className="add-btn add-btn-fill"
-          onClick={() => onAddIncome(form)}
+          onClick={() => onSubmit(form)}
         >
-          Add Income
+          {submitLabel}
         </button>
       </div>
     </div>
   );
 };
 
-export default AddIncomeForm;
+export default IncomeForm;

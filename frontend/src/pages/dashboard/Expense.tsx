@@ -5,9 +5,11 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { API_PATH } from "../../utils/apiPaths";
 import axiosInstance, { apiErrorMessage } from "../../utils/axiosInstance";
 import { ExpenseOverview } from "../../components/expense/ExpenseOverview";
-import AddExpenseForm, {
+import ExpenseForm from "../../components/expense/ExpenseForm";
+import {
+  toExpenseFormValues,
   type ExpenseFormValues,
-} from "../../components/expense/AddExpenseForm";
+} from "../../utils/transactionForm";
 import Modal from "../../components/Modal";
 import ExpenseList from "../../components/expense/ExpenseList";
 import DeleteAlert from "../../components/DeleteAlert";
@@ -27,29 +29,41 @@ const Expense = () => {
   } = useTransactions<ExpenseType>(API_PATH.EXPENSE.GET_ALL_EXPENSE);
 
   const invalidate = useInvalidateFinancials();
-  const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editing, setEditing] = useState<ExpenseType | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
-  const handleAddExpense = async (expense: ExpenseFormValues) => {
-    const { category, amount, date, icon } = expense;
+  const closeForm = () => {
+    setIsCreating(false);
+    setEditing(null);
+  };
+
+  const handleSubmit = async (values: ExpenseFormValues) => {
+    const { category, amount, date, icon } = values;
     if (!category.trim()) return toast.error("Category is required");
     if (!amount || isNaN(Number(amount)) || Number(amount) <= 0) {
       return toast.error("Amount must be a positive number");
     }
     if (!date) return toast.error("Date is required");
 
+    const payload = { category, amount: Number(amount), date, icon };
+
     try {
-      await axiosInstance.post(API_PATH.EXPENSE.ADD_EXPENSE, {
-        category,
-        amount: Number(amount),
-        date,
-        icon,
-      });
-      setOpenAddExpenseModal(false);
-      toast.success("Expense added successfully");
+      if (editing) {
+        await axiosInstance.put(
+          API_PATH.EXPENSE.UPDATE_EXPENSE(editing._id),
+          payload
+        );
+      } else {
+        await axiosInstance.post(API_PATH.EXPENSE.ADD_EXPENSE, payload);
+      }
+      toast.success(editing ? "Expense updated" : "Expense added successfully");
+      closeForm();
       invalidate("expense");
     } catch (err) {
-      toast.error(apiErrorMessage(err, "Failed to add expense"));
+      toast.error(
+        apiErrorMessage(err, `Failed to ${editing ? "update" : "add"} expense`)
+      );
     }
   };
 
@@ -82,7 +96,7 @@ const Expense = () => {
         <div className="grid grid-cols-1 gap-6">
           <ExpenseOverview
             transactions={expenseData}
-            onExpenseIncome={() => setOpenAddExpenseModal(true)}
+            onExpenseIncome={() => setIsCreating(true)}
           />
           <ExpenseList
             transactions={expenseData}
@@ -92,17 +106,26 @@ const Expense = () => {
             onFilterChange={setFilter}
             onFilterClear={clearFilters}
             onPageChange={setPage}
+            onEdit={(id) =>
+              setEditing(expenseData.find((e) => e._id === id) ?? null)
+            }
             onDelete={setDeleteId}
             onDownload={handleDownload}
           />
         </div>
 
         <Modal
-          isOpen={openAddExpenseModal}
-          onClose={() => setOpenAddExpenseModal(false)}
-          title="Add Expense"
+          isOpen={isCreating || editing !== null}
+          onClose={closeForm}
+          title={editing ? "Edit Expense" : "Add Expense"}
         >
-          <AddExpenseForm onAddExpense={handleAddExpense} />
+          {/* Keyed so switching records remounts the form with fresh state. */}
+          <ExpenseForm
+            key={editing?._id ?? "new"}
+            onSubmit={handleSubmit}
+            initialValues={editing ? toExpenseFormValues(editing) : undefined}
+            submitLabel={editing ? "Save Changes" : "Add Expense"}
+          />
         </Modal>
 
         <Modal
