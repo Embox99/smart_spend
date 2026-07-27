@@ -16,6 +16,7 @@ const Home = lazy(() => import("./pages/dashboard/Home"));
 const Income = lazy(() => import("./pages/dashboard/Income"));
 const Expense = lazy(() => import("./pages/dashboard/Expense"));
 const Budgets = lazy(() => import("./pages/dashboard/Budgets"));
+const Profile = lazy(() => import("./pages/dashboard/Profile"));
 
 const RouteFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -32,6 +33,7 @@ const protectedRoutes: { path: string; element: ReactElement }[] = [
   { path: "/income", element: <Income /> },
   { path: "/expense", element: <Expense /> },
   { path: "/budgets", element: <Budgets /> },
+  { path: "/profile", element: <Profile /> },
 ];
 
 const App = () => (

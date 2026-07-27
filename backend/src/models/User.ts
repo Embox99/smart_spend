@@ -7,6 +7,11 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   profileImageUrl: string | null;
+  /**
+   * Bumped whenever the password changes, which invalidates every token
+   * issued before it — otherwise a stolen session would outlive the reset.
+   */
+  tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
   comparePasswords(candidatePassword: string): Promise<boolean>;
@@ -26,6 +31,7 @@ const UserSchema = new Schema<UserDocument>(
     // see the 60-char bcrypt digest.
     password: { type: String, required: true },
     profileImageUrl: { type: String, default: null },
+    tokenVersion: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

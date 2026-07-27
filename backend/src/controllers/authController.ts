@@ -5,11 +5,16 @@ import { clearAuthCookie, setAuthCookie } from "../utils/authCookie";
 import User, { type UserDocument } from "../models/User";
 import asyncHandler from "../utils/asyncHandler";
 import AppError from "../utils/AppError";
-import type { LoginInput, RegisterInput } from "../validators/schemas";
+import type {
+  LoginInput,
+  PasswordInput,
+  ProfileInput,
+  RegisterInput,
+} from "../validators/schemas";
 import { env } from "../config/env";
 
-const generateToken = (id: string): string =>
-  jwt.sign({ id }, env.JWT_SECRET, {
+const generateToken = (user: UserDocument): string =>
+  jwt.sign({ id: user._id.toString(), v: user.tokenVersion }, env.JWT_SECRET, {
     expiresIn: env.JWT_EXPIRES_IN as jwt.SignOptions["expiresIn"],
   });
 
@@ -31,7 +36,7 @@ const sendSession = (
   user: UserDocument,
   status: number
 ): void => {
-  setAuthCookie(res, generateToken(user._id.toString()));
+  setAuthCookie(res, generateToken(user));
 
   const body: AuthResponse = {
     id: user._id.toString(),
@@ -83,6 +88,56 @@ export const logoutUser = asyncHandler(async (_req, res) => {
 // GET /api/v1/auth/getUser
 export const getUserInfo = asyncHandler(async (req, res) => {
   res.status(200).json(toUserDTO(req.user as UserDocument));
+});
+
+// PATCH /api/v1/auth/profile
+export const updateProfile = asyncHandler(async (req, res) => {
+  const { fullName, email } = req.body as ProfileInput;
+  const user = req.user as UserDocument;
+
+  if (email !== user.email && (await User.exists({ email }))) {
+    throw AppError.badRequest("Email is already used");
+  }
+
+  user.fullName = fullName;
+  user.email = email;
+  await user.save();
+
+  res.status(200).json(toUserDTO(user));
+});
+
+// PATCH /api/v1/auth/password
+export const changePassword = asyncHandler(async (req, res) => {
+  const { currentPassword, newPassword } = req.body as PasswordInput;
+
+  // req.user comes from a `select("-password")` query, so re-read with it.
+  const user = await User.findById(req.user?._id);
+  if (!user) throw AppError.unauthorized();
+
+  if (!(await user.comparePasswords(currentPassword))) {
+    throw AppError.badRequest("Current password is incorrect");
+  }
+
+  user.password = newPassword;
+  // Retires every token issued before this point, including on other
+  // devices; the caller gets a fresh cookie so their own session survives.
+  user.tokenVersion += 1;
+  await user.save();
+
+  sendSession(res, user, 200);
+});
+
+// DELETE /api/v1/auth/profile-image
+export const removeProfileImage = asyncHandler(async (req, res) => {
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    { profileImageUrl: null },
+    { new: true }
+  ).select("-password");
+
+  if (!user) throw AppError.unauthorized();
+
+  res.status(200).json(toUserDTO(user));
 });
 
 // POST /api/v1/auth/upload-image

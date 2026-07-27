@@ -55,7 +55,8 @@ support.
 **Security**
 
 - JWT issued as an httpOnly cookie, so page scripts can never read it
-- bcrypt password hashing
+- bcrypt password hashing; changing a password retires every session issued
+  before it, on every device
 - Every request body, param and query validated with zod
 - Rate limits on auth, upload and the API as a whole
 - `helmet`, a 100 kB JSON body cap, and a CORS allowlist
@@ -213,6 +214,9 @@ pass `Authorization: Bearer <token>` instead.
 | POST | `/auth/login` | `email`, `password` | `{ id, user, expiresAt }` + session cookie |
 | POST | `/auth/logout` | — | Clears the session cookie |
 | GET | `/auth/getUser` | — | `User` |
+| PATCH | `/auth/profile` | `fullName`, `email` | `User`; 400 if the email is taken |
+| PATCH | `/auth/password` | `currentPassword`, `newPassword` | New session cookie; retires tokens issued earlier |
+| DELETE | `/auth/profile-image` | — | `User` with the avatar cleared |
 | POST | `/auth/upload-image` | multipart `image` (≤ 2 MB, jpeg/png/webp) | `{ imageUrl, user }` |
 
 ### Income and Expense

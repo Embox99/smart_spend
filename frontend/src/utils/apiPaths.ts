@@ -7,6 +7,9 @@ export const API_PATH = {
     REGISTER: "/api/v1/auth/register",
     LOGOUT: "/api/v1/auth/logout",
     GET_USER_INFO: "/api/v1/auth/getUser",
+    UPDATE_PROFILE: "/api/v1/auth/profile",
+    CHANGE_PASSWORD: "/api/v1/auth/password",
+    REMOVE_PROFILE_IMAGE: "/api/v1/auth/profile-image",
   },
   DASHBOARD: {
     GET_DATA: "/api/v1/dashboard",

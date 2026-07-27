@@ -3,6 +3,7 @@ import {
   LuHandCoins,
   LuWalletMinimal,
   LuTarget,
+  LuUserCog,
   LuLogOut,
 } from "react-icons/lu";
 import type { IconType } from "react-icons";
@@ -19,5 +20,6 @@ export const SIDE_MENU_DATA: SideMenuItem[] = [
   { id: "02", label: "Income", icon: LuWalletMinimal, path: "/income" },
   { id: "03", label: "Expense", icon: LuHandCoins, path: "/expense" },
   { id: "04", label: "Budgets", icon: LuTarget, path: "/budgets" },
+  { id: "05", label: "Profile", icon: LuUserCog, path: "/profile" },
   { id: "06", label: "Logout", icon: LuLogOut, path: "logout" },
 ];

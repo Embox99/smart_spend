@@ -44,6 +44,24 @@ export const loginSchema = z.object({
   password: z.string().min(1, "Please enter your password"),
 });
 
+export const profileSchema = z.object({
+  fullName: z.string().trim().min(1, "Name is required").max(80),
+  email: z.email("Please enter a valid email address").trim().toLowerCase(),
+});
+
+export const passwordSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password"),
+    newPassword: z
+      .string()
+      .min(6, "New password must be at least 6 characters")
+      .max(128),
+  })
+  .refine((data) => data.currentPassword !== data.newPassword, {
+    message: "New password must differ from the current one",
+    path: ["newPassword"],
+  });
+
 export const expenseSchema = z.object({
   category: z.string().trim().min(1, "Category is required").max(60),
   amount: positiveAmount,
@@ -75,6 +93,8 @@ export const idParamSchema = z.object({ id: objectId });
 
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
+export type ProfileInput = z.infer<typeof profileSchema>;
+export type PasswordInput = z.infer<typeof passwordSchema>;
 export type ExpenseInput = z.infer<typeof expenseSchema>;
 export type IncomeInput = z.infer<typeof incomeSchema>;
 export type BudgetInput = z.infer<typeof budgetSchema>;

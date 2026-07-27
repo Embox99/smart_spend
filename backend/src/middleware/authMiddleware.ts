@@ -27,6 +27,12 @@ export const protect: RequestHandler = async (req, res, next) => {
       return;
     }
 
+    // A password change bumps the version, retiring tokens issued before it.
+    if (decoded.v !== user.tokenVersion) {
+      res.status(401).json({ message: "Session expired, please sign in again" });
+      return;
+    }
+
     req.user = user;
     next();
   } catch {
