@@ -4,6 +4,7 @@ import Budget from "../models/Budget";
 import Expense from "../models/Expense";
 import asyncHandler from "../utils/asyncHandler";
 import AppError from "../utils/AppError";
+import { monthRange } from "../utils/dateRange";
 import type { BudgetInput, BudgetQuery } from "../validators/schemas";
 
 interface SpentRow {
@@ -17,9 +18,7 @@ export const getBudgets = asyncHandler(async (req, res) => {
   const query = req.validatedQuery as BudgetQuery | undefined;
   const month = query?.month ?? new Date().toISOString().slice(0, 7);
 
-  const [year, mon] = month.split("-").map(Number) as [number, number];
-  const from = new Date(year, mon - 1, 1);
-  const to = new Date(year, mon, 1); // exclusive upper bound
+  const { from, to } = monthRange(month);
 
   const [budgets, spentByCategory] = await Promise.all([
     Budget.find({ userId, month }).sort({ category: 1 }).lean(),

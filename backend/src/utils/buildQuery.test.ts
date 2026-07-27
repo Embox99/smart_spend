@@ -29,12 +29,20 @@ describe("buildQuery", () => {
     expect(filter.amount).toEqual({ $gte: 10 });
   });
 
-  it("stretches the upper date bound to the end of the day", () => {
+  it("stretches the upper date bound to the end of the day in UTC", () => {
     const { filter } = build({ to: "2024-03-15" });
     const upper = (filter.date as { $lte: Date }).$lte;
 
-    expect(upper.getHours()).toBe(23);
-    expect(upper.getMinutes()).toBe(59);
+    // Asserted as an instant — local getters would shift with the server zone.
+    expect(upper.toISOString()).toBe("2024-03-15T23:59:59.999Z");
+  });
+
+  it("keeps a transaction dated the boundary day inside the range", () => {
+    const { filter } = build({ from: "2024-03-01", to: "2024-03-31" });
+    const { $gte, $lte } = filter.date as { $gte: Date; $lte: Date };
+
+    expect(new Date("2024-03-01") >= $gte).toBe(true);
+    expect(new Date("2024-03-31") <= $lte).toBe(true);
   });
 
   it("escapes regex metacharacters in the search term", () => {

@@ -1,5 +1,6 @@
 import type { FilterQuery, SortOrder } from "mongoose";
 import type { ParsedQs } from "qs";
+import { endOfUtcDay } from "./dateRange";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -55,12 +56,10 @@ const buildQuery = <T>(
     if (!isNaN(d.getTime())) dateRange.$gte = d;
   }
   if (to) {
-    // Include the full "to" day by setting time to 23:59:59.
+    // Include the full "to" day. Dates are stored at UTC midnight, so the
+    // day must be closed in UTC as well.
     const d = new Date(to);
-    if (!isNaN(d.getTime())) {
-      d.setHours(23, 59, 59, 999);
-      dateRange.$lte = d;
-    }
+    if (!isNaN(d.getTime())) dateRange.$lte = endOfUtcDay(d);
   }
   if (Object.keys(dateRange).length) filter.date = dateRange;
 
