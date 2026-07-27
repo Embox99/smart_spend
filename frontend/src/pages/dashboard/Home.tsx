@@ -8,7 +8,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { queryKeys } from "../../utils/queryKeys";
 import InfoCard from "../../components/cards/InfoCard";
-import { addThousandsSeparator } from "../../utils/helper";
+import { formatAmountCompact } from "../../utils/money";
 import RecentTransactions from "../../components/dashboard/RecentTransactions";
 import FinanceOverview from "../../components/dashboard/FinanceOverview";
 import ExpenseTransaction from "../../components/dashboard/ExpenseTransaction";
@@ -42,19 +42,19 @@ const Home = () => {
           <InfoCard
             icon={<IoMdCard />}
             label="Total Balance"
-            value={addThousandsSeparator(totalBalance)}
+            value={formatAmountCompact(totalBalance)}
             color="bg-primary"
           />
           <InfoCard
             icon={<LuWalletMinimal />}
             label="Total Income"
-            value={addThousandsSeparator(totalIncome)}
+            value={formatAmountCompact(totalIncome)}
             color="bg-orange-500"
           />
           <InfoCard
             icon={<LuHandCoins />}
             label="Total Expense"
-            value={addThousandsSeparator(totalExpense)}
+            value={formatAmountCompact(totalExpense)}
             color="bg-red-500"
           />
         </div>

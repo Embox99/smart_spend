@@ -16,13 +16,6 @@ export const getInitials = (name?: string | null): string => {
     .toUpperCase();
 };
 
-export const addThousandsSeparator = (num?: number | null): string => {
-  if (num == null || isNaN(num)) return "";
-  const [integerPart, fractionalPart] = num.toString().split(".");
-  const formatted = (integerPart ?? "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-  return fractionalPart ? `${formatted}.${fractionalPart}` : formatted;
-};
-
 const safeFormat = (date: string | Date, pattern: string): string => {
   try {
     const d = typeof date === "string" ? parseISO(date) : date;

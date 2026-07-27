@@ -10,7 +10,7 @@ const expense: Expense = {
   _id: "e1",
   userId: "u1",
   category: "Coffee",
-  amount: 7.5,
+  amount: 750, // 7.50 in cents
   date: "2024-03-15T00:00:00.000Z",
   icon: "https://cdn.example.com/i.png",
   createdAt: "",

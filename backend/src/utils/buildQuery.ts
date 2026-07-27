@@ -1,6 +1,7 @@
 import type { FilterQuery, SortOrder } from "mongoose";
 import type { ParsedQs } from "qs";
 import { endOfUtcDay } from "./dateRange";
+import { toMinorUnits } from "./money";
 
 const MAX_LIMIT = 100;
 const DEFAULT_LIMIT = 20;
@@ -64,11 +65,12 @@ const buildQuery = <T>(
   if (Object.keys(dateRange).length) filter.date = dateRange;
 
   // ── amount range ──────────────────────────────────────────────────────────
+  // Bounds arrive as decimals but amounts are stored as minor units.
   const amountRange: Record<string, number> = {};
   const min = parseFloat(asString(queryParams.minAmount) ?? "");
   const max = parseFloat(asString(queryParams.maxAmount) ?? "");
-  if (!isNaN(min)) amountRange.$gte = min;
-  if (!isNaN(max)) amountRange.$lte = max;
+  if (!isNaN(min)) amountRange.$gte = toMinorUnits(min);
+  if (!isNaN(max)) amountRange.$lte = toMinorUnits(max);
   if (Object.keys(amountRange).length) filter.amount = amountRange;
 
   // ── text search on category / source ─────────────────────────────────────

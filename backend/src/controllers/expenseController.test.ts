@@ -40,7 +40,7 @@ describe("expenses", () => {
     }).expect(201);
 
     expect(res.body.category).toBe("Groceries"); // trimmed by the schema
-    expect(res.body.amount).toBe(42.5);
+    expect(res.body.amount).toBe(4250); // 42.50 in cents
   });
 
   it("rejects a non-positive or non-numeric amount", async () => {
@@ -153,7 +153,7 @@ describe("expenses", () => {
 
     expect(res.body._id).toBe(created.body._id);
     expect(res.body.category).toBe("Coffee");
-    expect(res.body.amount).toBe(7.5);
+    expect(res.body.amount).toBe(750); // 7.50 in cents
     expect(res.body.date).toContain("2024-03-16");
 
     // The change is persisted, not just echoed back.

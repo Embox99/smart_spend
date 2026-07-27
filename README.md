@@ -105,6 +105,26 @@ shared/types.d.ts  Wire contract imported by both sides as @shared/types
 Changing a field there breaks whichever side has not been updated, at compile
 time rather than in the browser.
 
+### Amounts
+
+Amounts are stored and transmitted as **integer minor units** (cents).
+Doubles cannot hold most decimal fractions exactly, so summing them drifts —
+a hundred entries of `0.07` add up to `7.000000000000004`. Integers keep every
+total exact; formatting happens only at render, via `frontend/src/utils/money.ts`.
+
+Request bodies still carry decimals (`amount: 12.50`) — the zod schema converts
+on the way in. Responses carry minor units (`1250`).
+
+**Upgrading an existing database** requires a one-off rescale:
+
+```bash
+cd backend
+npm run migrate:minor-units
+```
+
+It records completion in a `migrations` collection, so a second run is a no-op
+rather than multiplying every amount by 100 again.
+
 ---
 
 ## Getting Started

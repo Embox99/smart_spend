@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Expense } from "@shared/types";
 import {
-  addThousandsSeparator,
   getInitials,
   prepareExpenseLineChartData,
   validateEmail,
@@ -12,7 +11,7 @@ const expense = (over: Partial<Expense>): Expense =>
     _id: "1",
     userId: "u",
     category: "Food",
-    amount: 10,
+    amount: 1000,
     date: "2024-03-15T00:00:00.000Z",
     createdAt: "",
     updatedAt: "",
@@ -42,20 +41,6 @@ describe("getInitials", () => {
     expect(getInitials("  Ada   Lovelace  ")).toBe("AL");
     expect(getInitials("")).toBe("");
     expect(getInitials(null)).toBe("");
-  });
-});
-
-describe("addThousandsSeparator", () => {
-  it("groups digits and keeps the fraction", () => {
-    expect(addThousandsSeparator(1234567)).toBe("1,234,567");
-    expect(addThousandsSeparator(1234.56)).toBe("1,234.56");
-    expect(addThousandsSeparator(999)).toBe("999");
-    expect(addThousandsSeparator(0)).toBe("0");
-  });
-
-  it("returns an empty string for missing input", () => {
-    expect(addThousandsSeparator(null)).toBe("");
-    expect(addThousandsSeparator(NaN)).toBe("");
   });
 });
 

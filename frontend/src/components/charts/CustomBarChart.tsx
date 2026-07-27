@@ -9,6 +9,7 @@ import {
   Cell,
 } from "recharts";
 import { useTheme } from "../../context/themeContext";
+import { formatAmount, formatAmountCompact } from "../../utils/money";
 import type { ChartPoint, ChartTooltipProps } from "./chartTypes";
 
 const getBarColor = (index: number): string =>
@@ -26,7 +27,7 @@ const BarTooltip = ({ active, payload }: ChartTooltipProps) => {
       <p className="text-sm text-gray-600 dark:text-gray-300">
         Amount:{" "}
         <span className="text-sm font-medium text-gray-900 dark:text-white">
-          ${point.amount}
+          ${formatAmount(point.amount)}
         </span>
       </p>
     </div>
@@ -47,7 +48,11 @@ const CustomBarChart = ({ data }: { data: ChartPoint[] }) => {
             tick={{ fontSize: 12, fill: tickColor }}
             stroke="none"
           />
-          <YAxis tick={{ fontSize: 12, fill: tickColor }} stroke="none" />
+          <YAxis
+            tick={{ fontSize: 12, fill: tickColor }}
+            stroke="none"
+            tickFormatter={formatAmountCompact}
+          />
           <Tooltip content={<BarTooltip />} />
           <Bar dataKey="amount" fill="#875cf5" radius={[10, 10, 0, 0]}>
             {data.map((_, index) => (

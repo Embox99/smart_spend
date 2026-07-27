@@ -1,5 +1,6 @@
 import type { CategoryTotal } from "@shared/types";
 import CustomPieChart from "../charts/CustomPieChart";
+import { formatAmountCompact } from "../../utils/money";
 
 const COLORS = ["#875CF5", "#FA2C37", "#FF6900", "#4f39f6"];
 
@@ -25,7 +26,7 @@ const RecentIncomeWithChart = ({
       <CustomPieChart
         data={data.slice(0, COLORS.length)}
         label="Total Income"
-        totalAmount={`${totalIncome}`}
+        totalAmount={formatAmountCompact(totalIncome)}
         showTextAnchor
         colors={COLORS}
       />

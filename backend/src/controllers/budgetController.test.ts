@@ -33,7 +33,7 @@ describe("budgets", () => {
 
     const res = await getBudgets("2024-03").expect(200);
     expect(res.body).toHaveLength(1);
-    expect(res.body[0].limit).toBe(500);
+    expect(res.body[0].limit).toBe(50000);
   });
 
   it("matches spend to a budget regardless of category casing", async () => {
@@ -41,8 +41,8 @@ describe("budgets", () => {
     await addExpense({ category: "food", amount: 120, date: "2024-03-10" });
 
     const res = await getBudgets("2024-03").expect(200);
-    expect(res.body[0].spent).toBe(120);
-    expect(res.body[0].remaining).toBe(180);
+    expect(res.body[0].spent).toBe(12000);
+    expect(res.body[0].remaining).toBe(18000);
     expect(res.body[0].percentUsed).toBe(40);
   });
 
@@ -62,7 +62,7 @@ describe("budgets", () => {
     await addExpense({ category: "Food", amount: 90, date: "2024-04-01" });
 
     const res = await getBudgets("2024-03").expect(200);
-    expect(res.body[0].spent).toBe(70);
+    expect(res.body[0].spent).toBe(7000);
   });
 
   it("rejects a malformed month and a non-positive limit", async () => {

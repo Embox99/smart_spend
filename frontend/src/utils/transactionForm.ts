@@ -1,4 +1,5 @@
 import type { Expense, Income } from "@shared/types";
+import { toMajorUnits } from "./money";
 
 /** Form state is all strings — the inputs are uncontrolled by type. */
 export interface ExpenseFormValues {
@@ -35,14 +36,14 @@ export const EMPTY_INCOME_FORM: IncomeFormValues = {
  */
 export const toExpenseFormValues = (expense: Expense): ExpenseFormValues => ({
   category: expense.category,
-  amount: String(expense.amount),
+  amount: String(toMajorUnits(expense.amount)),
   date: expense.date.slice(0, 10),
   icon: expense.icon ?? "",
 });
 
 export const toIncomeFormValues = (income: Income): IncomeFormValues => ({
   source: income.source,
-  amount: String(income.amount),
+  amount: String(toMajorUnits(income.amount)),
   date: income.date.slice(0, 10),
   icon: income.icon ?? "",
 });

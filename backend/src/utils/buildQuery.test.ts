@@ -26,7 +26,7 @@ describe("buildQuery", () => {
   it("keeps the bound that does parse", () => {
     const { filter } = build({ minAmount: "10", maxAmount: "oops" });
 
-    expect(filter.amount).toEqual({ $gte: 10 });
+    expect(filter.amount).toEqual({ $gte: 1000 }); // decimals in, cents out
   });
 
   it("stretches the upper date bound to the end of the day in UTC", () => {

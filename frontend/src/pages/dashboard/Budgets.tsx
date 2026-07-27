@@ -14,6 +14,7 @@ import AddBudgetForm, {
 import axiosInstance, { apiErrorMessage } from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { queryKeys } from "../../utils/queryKeys";
+import { formatAmount } from "../../utils/money";
 import { useInvalidateFinancials } from "../../hooks/useInvalidateFinancials";
 
 const toMonthStr = (d: Date): string => format(d, "yyyy-MM");
@@ -70,8 +71,8 @@ const Budgets = () => {
   const overBudget = budgets.filter((b) => b.percentUsed >= 100).length;
 
   const summary = [
-    { label: "Total limit", value: `$${totalLimit.toLocaleString()}` },
-    { label: "Total spent", value: `$${totalSpent.toLocaleString()}` },
+    { label: "Total limit", value: `$${formatAmount(totalLimit)}` },
+    { label: "Total spent", value: `$${formatAmount(totalSpent)}` },
     { label: "Over budget", value: overBudget, danger: overBudget > 0 },
   ];
 

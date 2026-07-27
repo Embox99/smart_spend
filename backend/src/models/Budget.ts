@@ -4,6 +4,7 @@ export interface BudgetDocument extends Document {
   _id: mongoose.Types.ObjectId;
   userId: mongoose.Types.ObjectId;
   category: string;
+  /** Integer minor units — see utils/money.ts. */
   limit: number;
   /** "2024-03" — one budget per category per month. */
   month: string;

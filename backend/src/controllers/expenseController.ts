@@ -3,6 +3,7 @@ import buildQuery from "../utils/buildQuery";
 import asyncHandler from "../utils/asyncHandler";
 import AppError from "../utils/AppError";
 import { sendWorkbook } from "../utils/excel";
+import { toMajorUnits } from "../utils/money";
 import { buildPagination } from "../utils/pagination";
 import type { ExpenseInput } from "../validators/schemas";
 
@@ -98,7 +99,7 @@ export const downloadExpenseExcel = asyncHandler(async (req, res) => {
     ],
     rows: expenses.map((e) => ({
       category: e.category,
-      amount: e.amount,
+      amount: toMajorUnits(e.amount),
       date: new Date(e.date),
     })),
   });

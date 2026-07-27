@@ -1,4 +1,5 @@
 import type { ChartTooltipProps } from "./chartTypes";
+import { formatAmount } from "../../utils/money";
 
 const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
   const entry = payload?.[0];
@@ -12,7 +13,7 @@ const CustomTooltip = ({ active, payload }: ChartTooltipProps) => {
       <p className="text-sm text-gray-600 dark:text-gray-300">
         Amount:{" "}
         <span className="text-sm font-medium text-gray-900 dark:text-white">
-          {entry.value}
+          ${typeof entry.value === "number" ? formatAmount(entry.value) : entry.value}
         </span>
       </p>
     </div>

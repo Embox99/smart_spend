@@ -29,9 +29,9 @@ describe("dashboard", () => {
 
     const res = await getDashboard().expect(200);
 
-    expect(res.body.totalIncome).toBe(1000);
-    expect(res.body.totalExpense).toBe(400);
-    expect(res.body.totalBalance).toBe(600);
+    expect(res.body.totalIncome).toBe(100000);
+    expect(res.body.totalExpense).toBe(40000);
+    expect(res.body.totalBalance).toBe(60000);
   });
 
   it("groups the expense chart by category rather than per transaction", async () => {
@@ -43,8 +43,8 @@ describe("dashboard", () => {
       .last30DaysExpenses;
 
     expect(byCategory).toHaveLength(2);
-    expect(byCategory[0]).toEqual({ label: "Rent", amount: 400 });
-    expect(byCategory[1]).toEqual({ label: "Food", amount: 25 });
+    expect(byCategory[0]).toEqual({ label: "Rent", amount: 40000 });
+    expect(byCategory[1]).toEqual({ label: "Food", amount: 2500 });
   });
 
   it("groups categories case-insensitively", async () => {
@@ -55,7 +55,7 @@ describe("dashboard", () => {
       .last30DaysExpenses;
 
     expect(byCategory).toHaveLength(1);
-    expect(byCategory[0].amount).toBe(15);
+    expect(byCategory[0].amount).toBe(1500);
   });
 
   it("groups the income chart by source", async () => {
@@ -66,10 +66,10 @@ describe("dashboard", () => {
     const { bySource, total } = (await getDashboard().expect(200)).body
       .last60DaysIncome;
 
-    expect(total).toBe(1500);
+    expect(total).toBe(150000);
     expect(bySource).toEqual([
-      { label: "Salary", amount: 1000 },
-      { label: "Freelance", amount: 500 },
+      { label: "Salary", amount: 100000 },
+      { label: "Freelance", amount: 50000 },
     ]);
   });
 

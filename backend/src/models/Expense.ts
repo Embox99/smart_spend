@@ -5,6 +5,7 @@ export interface ExpenseDocument extends Document {
   userId: mongoose.Types.ObjectId;
   icon?: string | null;
   category: string;
+  /** Integer minor units — see utils/money.ts. */
   amount: number;
   date: Date;
   createdAt: Date;
@@ -16,7 +17,8 @@ const ExpenseSchema = new Schema<ExpenseDocument>(
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     icon: { type: String },
     category: { type: String, required: true },
-    amount: { type: Number, required: true },
+    // Integer minor units — see utils/money.ts.
+    amount: { type: Number, required: true, min: 1 },
     date: { type: Date, default: Date.now },
   },
   { timestamps: true }

@@ -1,10 +1,18 @@
 import { z } from "zod";
+import { MAX_MINOR_UNITS, toMinorUnits } from "../utils/money";
 
-// Amounts arrive as strings from form inputs and as numbers from JSON.
+/**
+ * Amounts arrive as decimal strings from form inputs and as numbers from
+ * JSON, and are stored as integer minor units. The conversion happens here so
+ * no controller ever sees a decimal amount.
+ */
 const positiveAmount = z.coerce
   .number({ message: "Amount must be a number" })
   .positive("Amount must be a positive number")
-  .finite();
+  .finite()
+  .transform(toMinorUnits)
+  .refine((minor) => minor > 0, "Amount must be at least 0.01")
+  .refine((minor) => minor <= MAX_MINOR_UNITS, "Amount is too large");
 
 const isoDate = z.coerce.date({ message: "Invalid date" });
 

@@ -26,6 +26,10 @@ interface TransactionBase {
   _id: string;
   userId: string;
   icon?: string | null;
+  /**
+   * Integer minor units (cents). Every amount crossing this boundary is an
+   * integer so sums stay exact; format for display, never for arithmetic.
+   */
   amount: number;
   date: string;
   createdAt: string;
@@ -53,6 +57,7 @@ export interface Budget {
   category: string;
   /** "YYYY-MM" */
   month: string;
+  /** Integer minor units (cents). */
   limit: number;
   icon: string | null;
   createdAt: string;
@@ -61,7 +66,9 @@ export interface Budget {
 
 /** A budget enriched with the spend computed for its month. */
 export interface BudgetWithSpend extends Budget {
+  /** Integer minor units (cents). */
   spent: number;
+  /** Integer minor units (cents). */
   remaining: number;
   /** Uncapped — can exceed 100 when a category is over budget. */
   percentUsed: number;
@@ -84,6 +91,7 @@ export interface Paginated<T> {
 /** One slice of a chart, already grouped server-side. */
 export interface CategoryTotal {
   label: string;
+  /** Integer minor units (cents). */
   amount: number;
 }
 
