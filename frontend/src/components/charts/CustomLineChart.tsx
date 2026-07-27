@@ -8,10 +8,11 @@ import {
   AreaChart,
 } from "recharts";
 import { useTheme } from "../../context/themeContext";
-import { formatAmount, formatAmountCompact } from "../../utils/money";
+import { useCurrency } from "../../hooks/useCurrency";
 import type { ChartPoint, ChartTooltipProps } from "./chartTypes";
 
 const LineTooltip = ({ active, payload }: ChartTooltipProps) => {
+  const { format } = useCurrency();
   const point = payload?.[0]?.payload;
   if (!active || !point) return null;
 
@@ -23,7 +24,7 @@ const LineTooltip = ({ active, payload }: ChartTooltipProps) => {
       <p className="text-sm text-gray-600 dark:text-gray-300">
         Amount:{" "}
         <span className="text-sm font-medium text-gray-900 dark:text-white">
-          ${formatAmount(point.amount)}
+          {format(point.amount)}
         </span>
       </p>
     </div>
@@ -31,6 +32,7 @@ const LineTooltip = ({ active, payload }: ChartTooltipProps) => {
 };
 
 export const CustomLineChart = ({ data }: { data: ChartPoint[] }) => {
+  const { formatCompact } = useCurrency();
   const { isDark } = useTheme();
   const tickColor = isDark ? "#9ca3af" : "#555";
 
@@ -53,7 +55,7 @@ export const CustomLineChart = ({ data }: { data: ChartPoint[] }) => {
           <YAxis
             tick={{ fontSize: 12, fill: tickColor }}
             stroke="none"
-            tickFormatter={formatAmountCompact}
+            tickFormatter={formatCompact}
           />
           <Tooltip content={<LineTooltip />} />
           <Area

@@ -1,5 +1,5 @@
 import { LuTrash2, LuUtensils } from "react-icons/lu";
-import { formatAmount } from "../../utils/money";
+import { useCurrency } from "../../hooks/useCurrency";
 import type { BudgetWithSpend } from "@shared/types";
 
 const getProgressColor = (pct: number) => {
@@ -26,6 +26,7 @@ interface BudgetCardProps {
 
 const BudgetCard = ({ budget, onDelete }: BudgetCardProps) => {
   const { category, limit, spent, remaining, percentUsed, icon } = budget;
+  const { format } = useCurrency();
   const colors = getProgressColor(percentUsed);
   const barWidth = Math.min(percentUsed, 100);
 
@@ -77,7 +78,7 @@ const BudgetCard = ({ budget, onDelete }: BudgetCardProps) => {
         <span>
           Spent:{" "}
           <span className="font-medium text-gray-800 dark:text-gray-200">
-            ${formatAmount(spent)}
+            {format(spent)}
           </span>
         </span>
         <span>
@@ -89,20 +90,20 @@ const BudgetCard = ({ budget, onDelete }: BudgetCardProps) => {
                 : "text-gray-800 dark:text-gray-200"
             }`}
           >
-            ${formatAmount(remaining)}
+            {format(remaining)}
           </span>{" "}
-          / ${formatAmount(limit)}
+          / {format(limit)}
         </span>
       </div>
 
       {percentUsed >= 100 && (
         <p className="mt-2 text-xs text-red-500 dark:text-red-400 font-medium">
-          Over budget by ${formatAmount(spent - limit)}
+          Over budget by {format(spent - limit)}
         </p>
       )}
       {percentUsed >= 80 && percentUsed < 100 && (
         <p className="mt-2 text-xs text-amber-500 dark:text-amber-400 font-medium">
-          Almost at limit — ${formatAmount(remaining)} left
+          Almost at limit — {format(remaining)} left
         </p>
       )}
     </div>

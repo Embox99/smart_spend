@@ -8,6 +8,8 @@ export interface User {
   fullName: string;
   email: string;
   profileImageUrl: string | null;
+  /** ISO 4217 code used to format every amount shown to this user. */
+  currency: string;
   createdAt?: string;
 }
 

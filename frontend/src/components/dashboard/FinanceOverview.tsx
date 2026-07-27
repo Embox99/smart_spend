@@ -1,5 +1,5 @@
 import CustomPieChart from "../charts/CustomPieChart";
-import { formatAmountCompact } from "../../utils/money";
+import { useCurrency } from "../../hooks/useCurrency";
 
 const COLORS = ["#875CF5", "#FA2C37", "#FF6900"];
 
@@ -14,6 +14,7 @@ const FinanceOverview = ({
   totalIncome,
   totalExpense,
 }: FinanceOverviewProps) => {
+  const { formatCompact } = useCurrency();
   const balanceData = [
     { label: "Total Balance", amount: totalBalance },
     { label: "Total Income", amount: totalIncome },
@@ -28,7 +29,7 @@ const FinanceOverview = ({
       <CustomPieChart
         data={balanceData}
         label="Total Balance"
-        totalAmount={formatAmountCompact(totalBalance)}
+        totalAmount={formatCompact(totalBalance)}
         colors={COLORS}
         showTextAnchor
       />

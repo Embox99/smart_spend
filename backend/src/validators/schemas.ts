@@ -47,6 +47,11 @@ export const loginSchema = z.object({
 export const profileSchema = z.object({
   fullName: z.string().trim().min(1, "Name is required").max(80),
   email: z.email("Please enter a valid email address").trim().toLowerCase(),
+  currency: z
+    .string()
+    .trim()
+    .toUpperCase()
+    .regex(/^[A-Z]{3}$/, "Currency must be a three-letter ISO code"),
 });
 
 export const passwordSchema = z

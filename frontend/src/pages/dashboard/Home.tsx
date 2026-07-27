@@ -8,7 +8,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { queryKeys } from "../../utils/queryKeys";
 import InfoCard from "../../components/cards/InfoCard";
-import { formatAmountCompact } from "../../utils/money";
+import { useCurrency } from "../../hooks/useCurrency";
 import RecentTransactions from "../../components/dashboard/RecentTransactions";
 import FinanceOverview from "../../components/dashboard/FinanceOverview";
 import ExpenseTransaction from "../../components/dashboard/ExpenseTransaction";
@@ -18,6 +18,7 @@ import RecentIncome from "../../components/dashboard/RecentIncome";
 
 const Home = () => {
   const navigate = useNavigate();
+  const { formatCompact } = useCurrency();
 
   const { data } = useQuery({
     queryKey: queryKeys.dashboard,
@@ -42,19 +43,19 @@ const Home = () => {
           <InfoCard
             icon={<IoMdCard />}
             label="Total Balance"
-            value={formatAmountCompact(totalBalance)}
+            value={formatCompact(totalBalance)}
             color="bg-primary"
           />
           <InfoCard
             icon={<LuWalletMinimal />}
             label="Total Income"
-            value={formatAmountCompact(totalIncome)}
+            value={formatCompact(totalIncome)}
             color="bg-orange-500"
           />
           <InfoCard
             icon={<LuHandCoins />}
             label="Total Expense"
-            value={formatAmountCompact(totalExpense)}
+            value={formatCompact(totalExpense)}
             color="bg-red-500"
           />
         </div>

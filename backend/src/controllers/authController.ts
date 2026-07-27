@@ -23,6 +23,7 @@ const toUserDTO = (user: UserDocument): UserDTO => ({
   fullName: user.fullName,
   email: user.email,
   profileImageUrl: user.profileImageUrl,
+  currency: user.currency,
   createdAt: user.createdAt?.toISOString(),
 });
 
@@ -92,7 +93,7 @@ export const getUserInfo = asyncHandler(async (req, res) => {
 
 // PATCH /api/v1/auth/profile
 export const updateProfile = asyncHandler(async (req, res) => {
-  const { fullName, email } = req.body as ProfileInput;
+  const { fullName, email, currency } = req.body as ProfileInput;
   const user = req.user as UserDocument;
 
   if (email !== user.email && (await User.exists({ email }))) {
@@ -101,6 +102,7 @@ export const updateProfile = asyncHandler(async (req, res) => {
 
   user.fullName = fullName;
   user.email = email;
+  user.currency = currency;
   await user.save();
 
   res.status(200).json(toUserDTO(user));

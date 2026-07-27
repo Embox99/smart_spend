@@ -1,6 +1,6 @@
 import type { CategoryTotal } from "@shared/types";
 import CustomPieChart from "../charts/CustomPieChart";
-import { formatAmountCompact } from "../../utils/money";
+import { useCurrency } from "../../hooks/useCurrency";
 
 const COLORS = ["#875CF5", "#FA2C37", "#FF6900", "#4f39f6"];
 
@@ -13,7 +13,10 @@ interface RecentIncomeWithChartProps {
 const RecentIncomeWithChart = ({
   data,
   totalIncome,
-}: RecentIncomeWithChartProps) => (
+}: RecentIncomeWithChartProps) => {
+  const { formatCompact } = useCurrency();
+
+  return (
   <div className="card">
     <div className="flex items-center justify-between">
       <h5 className="text-lg">Last 60 Days Income</h5>
@@ -26,12 +29,13 @@ const RecentIncomeWithChart = ({
       <CustomPieChart
         data={data.slice(0, COLORS.length)}
         label="Total Income"
-        totalAmount={formatAmountCompact(totalIncome)}
+        totalAmount={formatCompact(totalIncome)}
         showTextAnchor
         colors={COLORS}
       />
     )}
-  </div>
-);
+    </div>
+  );
+};
 
 export default RecentIncomeWithChart;

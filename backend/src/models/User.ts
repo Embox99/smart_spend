@@ -7,6 +7,8 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   profileImageUrl: string | null;
+  /** ISO 4217 code; drives how amounts are formatted for this user. */
+  currency: string;
   /**
    * Bumped whenever the password changes, which invalidates every token
    * issued before it — otherwise a stolen session would outlive the reset.
@@ -31,6 +33,12 @@ const UserSchema = new Schema<UserDocument>(
     // see the 60-char bcrypt digest.
     password: { type: String, required: true },
     profileImageUrl: { type: String, default: null },
+    currency: {
+      type: String,
+      default: "USD",
+      uppercase: true,
+      match: /^[A-Z]{3}$/,
+    },
     tokenVersion: { type: Number, default: 0 },
   },
   { timestamps: true }

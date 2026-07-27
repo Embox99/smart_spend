@@ -12,6 +12,8 @@ import { queryKeys } from "../../utils/queryKeys";
 import { useUser } from "../../hooks/useUser";
 import { validateEmail } from "../../utils/helper";
 import uploadImage from "../../utils/uploadImage";
+import { DEFAULT_CURRENCY } from "../../utils/money";
+import CurrencySelect from "../../components/inputs/CurrencySelect";
 
 const Profile = () => {
   const { user, updateUser } = useUser();
@@ -19,6 +21,7 @@ const Profile = () => {
 
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [currency, setCurrency] = useState(DEFAULT_CURRENCY);
   const [savingProfile, setSavingProfile] = useState(false);
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -31,6 +34,7 @@ const Profile = () => {
     if (!user) return;
     setFullName(user.fullName);
     setEmail(user.email);
+    setCurrency(user.currency);
   }, [user]);
 
   const applyUser = (next: User) => {
@@ -47,7 +51,7 @@ const Profile = () => {
     try {
       const { data } = await axiosInstance.patch<User>(
         API_PATH.AUTH.UPDATE_PROFILE,
-        { fullName, email }
+        { fullName, email, currency }
       );
       applyUser(data);
       toast.success("Profile updated");
@@ -179,6 +183,7 @@ const Profile = () => {
             label="Email Address"
             type="email"
           />
+          <CurrencySelect value={currency} onChange={setCurrency} />
           <div className="flex justify-end">
             <button
               type="submit"

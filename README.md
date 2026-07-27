@@ -47,6 +47,7 @@ support.
 
 **UI & UX**
 
+- Amounts formatted in the currency chosen on the profile page
 - Dark mode with system preference detection, applied before first paint
 - Responsive layout, skeleton loaders, accessible dialogs (focus trap, Escape)
 - Protected routes that check token expiry, not just its presence
@@ -214,7 +215,7 @@ pass `Authorization: Bearer <token>` instead.
 | POST | `/auth/login` | `email`, `password` | `{ id, user, expiresAt }` + session cookie |
 | POST | `/auth/logout` | — | Clears the session cookie |
 | GET | `/auth/getUser` | — | `User` |
-| PATCH | `/auth/profile` | `fullName`, `email` | `User`; 400 if the email is taken |
+| PATCH | `/auth/profile` | `fullName`, `email`, `currency` | `User`; 400 if the email is taken |
 | PATCH | `/auth/password` | `currentPassword`, `newPassword` | New session cookie; retires tokens issued earlier |
 | DELETE | `/auth/profile-image` | — | `User` with the avatar cleared |
 | POST | `/auth/upload-image` | multipart `image` (≤ 2 MB, jpeg/png/webp) | `{ imageUrl, user }` |

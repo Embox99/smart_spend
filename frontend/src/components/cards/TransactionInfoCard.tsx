@@ -5,7 +5,7 @@ import {
   LuPencil,
   LuTrash2,
 } from "react-icons/lu";
-import { formatAmount } from "../../utils/money";
+import { useCurrency } from "../../hooks/useCurrency";
 
 interface TransactionInfoCardProps {
   title: string;
@@ -34,6 +34,7 @@ const TransactionInfoCard = ({
   onEdit,
   onDelete,
 }: TransactionInfoCardProps) => {
+  const { format } = useCurrency();
   const amountStyles =
     type === "income"
       ? "bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400"
@@ -88,7 +89,7 @@ const TransactionInfoCard = ({
             className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${amountStyles}`}
           >
             <h6 className="text-xs font-medium">
-              {type === "income" ? "+" : "-"} ${formatAmount(amount)}
+              {type === "income" ? "+" : "-"} {format(amount)}
             </h6>
             {type === "income" ? <LuTrendingUp /> : <LuTrendingDown />}
           </div>

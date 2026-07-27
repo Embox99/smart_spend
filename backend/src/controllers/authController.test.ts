@@ -163,11 +163,37 @@ describe("auth", () => {
     const res = await request(app)
       .patch("/api/v1/auth/profile")
       .set("Cookie", user.cookies)
-      .send({ fullName: "  Ada King  ", email: "Ada.King@Example.COM" })
+      .send({
+        fullName: "  Ada King  ",
+        email: "Ada.King@Example.COM",
+        currency: "eur",
+      })
       .expect(200);
 
     expect(res.body.fullName).toBe("Ada King");
     expect(res.body.email).toBe("ada.king@example.com");
+    expect(res.body.currency).toBe("EUR"); // normalised to ISO casing
+  });
+
+  it("defaults a new account to USD", async () => {
+    const user = await createUser();
+
+    const res = await request(app)
+      .get("/api/v1/auth/getUser")
+      .set("Cookie", user.cookies)
+      .expect(200);
+
+    expect(res.body.currency).toBe("USD");
+  });
+
+  it("rejects a currency that is not a three-letter code", async () => {
+    const user = await createUser();
+
+    await request(app)
+      .patch("/api/v1/auth/profile")
+      .set("Cookie", user.cookies)
+      .send({ fullName: "Ada", email: user.email, currency: "dollars" })
+      .expect(400);
   });
 
   it("refuses an email another account already holds", async () => {
@@ -177,7 +203,7 @@ describe("auth", () => {
     const res = await request(app)
       .patch("/api/v1/auth/profile")
       .set("Cookie", user.cookies)
-      .send({ fullName: "Ada", email: taken.email })
+      .send({ fullName: "Ada", email: taken.email, currency: "USD" })
       .expect(400);
 
     expect(res.body.message).toBe("Email is already used");
@@ -189,7 +215,7 @@ describe("auth", () => {
     await request(app)
       .patch("/api/v1/auth/profile")
       .set("Cookie", user.cookies)
-      .send({ fullName: "Renamed", email: user.email })
+      .send({ fullName: "Renamed", email: user.email, currency: "USD" })
       .expect(200);
   });
 
