@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import app from "../app";
-import { auth, createUser, type TestUser } from "../test/helpers";
+import { createUser, type TestUser } from "../test/helpers";
 
 const ENDPOINT = "/api/v1/expense";
 
@@ -22,7 +22,7 @@ const asParser = binaryParser as unknown as (str: string) => unknown;
 const addExpense = (user: TestUser, body: Record<string, unknown>) =>
   request(app)
     .post(`${ENDPOINT}/add`)
-    .set("Authorization", auth(user.token))
+    .set("Cookie", user.cookies)
     .send(body);
 
 describe("expenses", () => {
@@ -68,7 +68,7 @@ describe("expenses", () => {
 
     const page2 = await request(app)
       .get(`${ENDPOINT}/get?page=2&limit=20`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .expect(200);
 
     expect(page2.body.data).toHaveLength(5);
@@ -91,7 +91,7 @@ describe("expenses", () => {
     // An empty range object used to be sent to Mongo and matched nothing.
     const res = await request(app)
       .get(`${ENDPOINT}/get?minAmount=abc`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .expect(200);
 
     expect(res.body.data).toHaveLength(1);
@@ -107,18 +107,18 @@ describe("expenses", () => {
 
     const bySearch = await request(app)
       .get(`${ENDPOINT}/get?search=cof`)
-      .set("Authorization", auth(user.token));
+      .set("Cookie", user.cookies);
     expect(bySearch.body.data).toHaveLength(1);
 
     const byAmount = await request(app)
       .get(`${ENDPOINT}/get?minAmount=100`)
-      .set("Authorization", auth(user.token));
+      .set("Cookie", user.cookies);
     expect(byAmount.body.data).toHaveLength(1);
     expect(byAmount.body.data[0].category).toBe("Rent");
 
     const byDate = await request(app)
       .get(`${ENDPOINT}/get?from=2024-03-10&to=2024-03-31`)
-      .set("Authorization", auth(user.token));
+      .set("Cookie", user.cookies);
     expect(byDate.body.data).toHaveLength(1);
   });
 
@@ -132,7 +132,7 @@ describe("expenses", () => {
 
     const res = await request(app)
       .get(`${ENDPOINT}/get`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .expect(200);
 
     expect(res.body.data).toHaveLength(0);
@@ -147,7 +147,7 @@ describe("expenses", () => {
 
     const res = await request(app)
       .put(`${ENDPOINT}/${created.body._id}`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send({ category: "Coffee", amount: 7.5, date: "2024-03-16" })
       .expect(200);
 
@@ -159,7 +159,7 @@ describe("expenses", () => {
     // The change is persisted, not just echoed back.
     const list = await request(app)
       .get(`${ENDPOINT}/get`)
-      .set("Authorization", auth(user.token));
+      .set("Cookie", user.cookies);
     expect(list.body.data).toHaveLength(1);
     expect(list.body.data[0].category).toBe("Coffee");
   });
@@ -173,13 +173,13 @@ describe("expenses", () => {
 
     await request(app)
       .put(`${ENDPOINT}/${created.body._id}`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send({ category: "Coffee", amount: -1, date: "2024-03-15" })
       .expect(400);
 
     await request(app)
       .put(`${ENDPOINT}/${created.body._id}`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send({ category: "", amount: 5, date: "2024-03-15" })
       .expect(400);
   });
@@ -194,14 +194,14 @@ describe("expenses", () => {
 
     await request(app)
       .put(`${ENDPOINT}/${created.body._id}`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send({ category: "Mine now", amount: 1, date: "2024-03-15" })
       .expect(404);
 
     // And the record is untouched.
     const list = await request(app)
       .get(`${ENDPOINT}/get`)
-      .set("Authorization", auth(other.token));
+      .set("Cookie", other.cookies);
     expect(list.body.data[0].category).toBe("Theirs");
   });
 
@@ -215,14 +215,14 @@ describe("expenses", () => {
 
     await request(app)
       .delete(`${ENDPOINT}/${created.body._id}`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .expect(404);
   });
 
   it("rejects an id that is not an ObjectId", async () => {
     await request(app)
       .delete(`${ENDPOINT}/not-an-id`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .expect(400);
   });
 
@@ -235,7 +235,7 @@ describe("expenses", () => {
 
     const res = await request(app)
       .get(`${ENDPOINT}/downloadexcel`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .buffer(true)
       .parse(asParser)
       .expect(200);

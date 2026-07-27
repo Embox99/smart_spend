@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import app from "../app";
-import { auth, createUser, type TestUser } from "../test/helpers";
+import { createUser, type TestUser } from "../test/helpers";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -15,13 +15,13 @@ describe("dashboard", () => {
   const add = (kind: "income" | "expense", body: Record<string, unknown>) =>
     request(app)
       .post(`/api/v1/${kind}/add`)
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send(body);
 
   const getDashboard = () =>
     request(app)
       .get("/api/v1/dashboard")
-      .set("Authorization", auth(user.token));
+      .set("Cookie", user.cookies);
 
   it("returns totals as plain numbers, not aggregate rows", async () => {
     await add("income", { source: "Salary", amount: 1000, date: today() });

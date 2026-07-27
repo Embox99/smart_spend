@@ -1,13 +1,13 @@
 import { Navigate, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
-import { isTokenValid, clearToken } from "../utils/token";
+import { clearSession, hasLiveSession } from "../utils/token";
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
 
-  if (!isTokenValid()) {
-    // Drop the expired token so the login page starts from a clean state.
-    clearToken();
+  if (!hasLiveSession()) {
+    // Drop the stale marker so the login page starts from a clean state.
+    clearSession();
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 

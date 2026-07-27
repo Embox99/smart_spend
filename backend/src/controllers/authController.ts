@@ -1,5 +1,7 @@
 import jwt from "jsonwebtoken";
+import type { Response } from "express";
 import type { AuthResponse, User as UserDTO } from "@shared/types";
+import { clearAuthCookie, setAuthCookie } from "../utils/authCookie";
 import User, { type UserDocument } from "../models/User";
 import asyncHandler from "../utils/asyncHandler";
 import AppError from "../utils/AppError";
@@ -19,11 +21,26 @@ const toUserDTO = (user: UserDocument): UserDTO => ({
   createdAt: user.createdAt?.toISOString(),
 });
 
-const toAuthResponse = (user: UserDocument): AuthResponse => ({
-  id: user._id.toString(),
-  user: toUserDTO(user),
-  token: generateToken(user._id.toString()),
-});
+/**
+ * Issues the session as an httpOnly cookie rather than a body field, so a
+ * cross-site script cannot read it. The expiry is echoed back so the client
+ * can decide what to render without holding the credential itself.
+ */
+const sendSession = (
+  res: Response,
+  user: UserDocument,
+  status: number
+): void => {
+  setAuthCookie(res, generateToken(user._id.toString()));
+
+  const body: AuthResponse = {
+    id: user._id.toString(),
+    user: toUserDTO(user),
+    expiresAt: new Date(Date.now() + env.SESSION_MAX_AGE_MS).toISOString(),
+  };
+
+  res.status(status).json(body);
+};
 
 // POST /api/v1/auth/register
 export const registerUser = asyncHandler(async (req, res) => {
@@ -41,7 +58,7 @@ export const registerUser = asyncHandler(async (req, res) => {
     profileImageUrl: profileImageUrl || null,
   });
 
-  res.status(201).json(toAuthResponse(user));
+  sendSession(res, user, 201);
 });
 
 // POST /api/v1/auth/login
@@ -54,7 +71,13 @@ export const loginUser = asyncHandler(async (req, res) => {
     throw AppError.badRequest("Invalid credentials");
   }
 
-  res.status(200).json(toAuthResponse(user));
+  sendSession(res, user, 200);
+});
+
+// POST /api/v1/auth/logout
+export const logoutUser = asyncHandler(async (_req, res) => {
+  clearAuthCookie(res);
+  res.status(200).json({ message: "Logged out" });
 });
 
 // GET /api/v1/auth/getUser

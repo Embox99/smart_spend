@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { SIDE_MENU_DATA } from "../../utils/data";
 import { useUser } from "../../hooks/useUser";
-import { clearToken } from "../../utils/token";
+import { clearSession } from "../../utils/token";
+import axiosInstance from "../../utils/axiosInstance";
+import { API_PATH } from "../../utils/apiPaths";
 import CharAvatar from "../cards/CharAvatar";
 
 const SideMenu = ({ activeMenu }: { activeMenu: string }) => {
@@ -10,10 +12,16 @@ const SideMenu = ({ activeMenu }: { activeMenu: string }) => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const handleClick = (route: string) => {
+  const handleClick = async (route: string) => {
     if (route === "logout") {
-      // Only the token — localStorage.clear() also wiped the theme choice.
-      clearToken();
+      // The cookie is httpOnly, so only the server can revoke it. A failure
+      // here must still take the user out of the app locally.
+      try {
+        await axiosInstance.post(API_PATH.AUTH.LOGOUT);
+      } catch {
+        // Ignored — the local session is cleared either way.
+      }
+      clearSession();
       clearUser();
       queryClient.clear();
       navigate("/login", { replace: true });
@@ -55,7 +63,7 @@ const SideMenu = ({ activeMenu }: { activeMenu: string }) => {
                 ? "text-white bg-primary dark:bg-violet-600"
                 : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
             }`}
-          onClick={() => handleClick(item.path)}
+          onClick={() => void handleClick(item.path)}
         >
           <item.icon />
           {item.label}

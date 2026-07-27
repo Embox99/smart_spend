@@ -14,7 +14,12 @@ export interface User {
 export interface AuthResponse {
   id: string;
   user: User;
-  token: string;
+  /**
+   * When the session cookie lapses, ISO-8601. The token itself is httpOnly
+   * and never reaches JavaScript; this only lets the client decide what to
+   * render. The server remains the authority.
+   */
+  expiresAt: string;
 }
 
 export interface UploadImageResponse {

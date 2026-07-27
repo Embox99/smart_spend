@@ -7,7 +7,7 @@ import {
 } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { isTokenValid } from "./utils/token";
+import { hasLiveSession } from "./utils/token";
 
 // Charts and the emoji picker are heavy and only needed once signed in.
 const Login = lazy(() => import("./pages/auth/Login"));
@@ -24,7 +24,7 @@ const RouteFallback = () => (
 );
 
 const Root = () => (
-  <Navigate to={isTokenValid() ? "/dashboard" : "/login"} replace />
+  <Navigate to={hasLiveSession() ? "/dashboard" : "/login"} replace />
 );
 
 const protectedRoutes: { path: string; element: ReactElement }[] = [

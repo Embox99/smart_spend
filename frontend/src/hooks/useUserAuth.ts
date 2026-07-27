@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import type { User } from "@shared/types";
 import axiosInstance from "../utils/axiosInstance";
 import { API_PATH } from "../utils/apiPaths";
-import { getToken, clearToken } from "../utils/token";
+import { clearSession, hasLiveSession } from "../utils/token";
 import { queryKeys } from "../utils/queryKeys";
 import { useUser } from "./useUser";
 
@@ -27,7 +27,7 @@ export const useUserAuth = (): UseUserAuthResult => {
       const res = await axiosInstance.get<User>(API_PATH.AUTH.GET_USER_INFO);
       return res.data;
     },
-    enabled: Boolean(getToken()),
+    enabled: hasLiveSession(),
     staleTime: 5 * 60 * 1000,
   });
 
@@ -37,7 +37,7 @@ export const useUserAuth = (): UseUserAuthResult => {
 
   useEffect(() => {
     if (!isError) return;
-    clearToken();
+    clearSession();
     clearUser();
     navigate("/login", { replace: true });
   }, [isError, clearUser, navigate]);

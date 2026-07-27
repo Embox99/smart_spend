@@ -2,14 +2,15 @@ import request from "supertest";
 import app from "../app";
 
 export interface TestUser {
-  token: string;
+  /** Raw Set-Cookie values, replayed on subsequent requests. */
+  cookies: string[];
   id: string;
   email: string;
 }
 
 let counter = 0;
 
-/** Registers a fresh user and returns its bearer token. */
+/** Registers a fresh user and returns its session cookie. */
 export const createUser = async (
   overrides: Partial<{ fullName: string; email: string; password: string }> = {}
 ): Promise<TestUser> => {
@@ -25,7 +26,17 @@ export const createUser = async (
     })
     .expect(201);
 
-  return { token: res.body.token, id: res.body.id, email };
+  return { cookies: cookiesFrom(res), id: res.body.id, email };
 };
 
-export const auth = (token: string) => `Bearer ${token}`;
+export const cookiesFrom = (res: request.Response): string[] => {
+  const raw = res.headers["set-cookie"];
+  if (!raw) return [];
+  return Array.isArray(raw) ? raw : [raw];
+};
+
+/** Reads one cookie's attributes out of a Set-Cookie header. */
+export const cookieAttributes = (
+  cookies: string[],
+  name: string
+): string | undefined => cookies.find((c) => c.startsWith(`${name}=`));

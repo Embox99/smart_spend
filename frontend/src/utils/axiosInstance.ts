@@ -2,21 +2,18 @@ import axios, { AxiosError } from "axios";
 import toast from "react-hot-toast";
 import type { ApiError } from "@shared/types";
 import { BASE_URL } from "./apiPaths";
-import { getToken, clearToken } from "./token";
+import { clearSession } from "./token";
 
 const axiosInstance = axios.create({
   baseURL: BASE_URL,
   timeout: 15000,
+  // The session is an httpOnly cookie, so it has to ride along explicitly on
+  // cross-origin requests.
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-});
-
-axiosInstance.interceptors.request.use((config) => {
-  const token = getToken();
-  if (token) config.headers.Authorization = `Bearer ${token}`;
-  return config;
 });
 
 axiosInstance.interceptors.response.use(
@@ -25,7 +22,7 @@ axiosInstance.interceptors.response.use(
     const status = error.response?.status;
 
     if (status === 401) {
-      clearToken();
+      clearSession();
       // Replace rather than push so back does not return to a dead session.
       if (!window.location.pathname.startsWith("/login")) {
         window.location.replace("/login");

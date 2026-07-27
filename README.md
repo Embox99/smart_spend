@@ -52,7 +52,8 @@ support.
 
 **Security**
 
-- JWT authentication, bcrypt password hashing
+- JWT issued as an httpOnly cookie, so page scripts can never read it
+- bcrypt password hashing
 - Every request body, param and query validated with zod
 - Rate limits on auth, upload and the API as a whole
 - `helmet`, a 100 kB JSON body cap, and a CORS allowlist
@@ -181,6 +182,8 @@ Both packages expose the same set:
 | `CLIENT_URL` | no | Allowed CORS origin(s), comma-separated | `http://localhost:5173` |
 | `PORT` | no | Port the API listens on (default 5000) | `5000` |
 | `JWT_EXPIRES_IN` | no | Token lifetime (default `7d`) | `7d` |
+| `SESSION_MAX_AGE_MS` | no | Session-cookie lifetime; keep in step with the token | `604800000` |
+| `CROSS_SITE_COOKIES` | no | Set to `1` when the API and the SPA are on different sites — issues the cookie `SameSite=None; Secure`, so it needs HTTPS | `1` |
 | `PUBLIC_URL` | no | Base URL used to build uploaded-image links | `https://api.example.com` |
 | `TRUST_PROXY` | no | Set to `1` behind a reverse proxy so rate limiting sees the real IP | `1` |
 | `NODE_ENV` | no | `development` \| `production` \| `test` | `production` |
@@ -195,15 +198,18 @@ Both packages expose the same set:
 
 ## API Reference
 
-Base path `/api/v1`. Every endpoint except `/auth/register` and `/auth/login`
-requires `Authorization: Bearer <token>`.
+Base path `/api/v1`. Every endpoint except `/auth/register`, `/auth/login` and
+`/auth/logout` requires a session. Browsers send the httpOnly cookie issued at
+login automatically — send requests with credentials. Non-browser clients may
+pass `Authorization: Bearer <token>` instead.
 
 ### Auth
 
 | Method | Path | Body | Returns |
 | ------ | -------------------- | ------------------------------------------ | ---------------------------- |
-| POST | `/auth/register` | `fullName`, `email`, `password`, `profileImageUrl?` | `{ id, user, token }` |
-| POST | `/auth/login` | `email`, `password` | `{ id, user, token }` |
+| POST | `/auth/register` | `fullName`, `email`, `password`, `profileImageUrl?` | `{ id, user, expiresAt }` + session cookie |
+| POST | `/auth/login` | `email`, `password` | `{ id, user, expiresAt }` + session cookie |
+| POST | `/auth/logout` | — | Clears the session cookie |
 | GET | `/auth/getUser` | — | `User` |
 | POST | `/auth/upload-image` | multipart `image` (≤ 2 MB, jpeg/png/webp) | `{ imageUrl, user }` |
 

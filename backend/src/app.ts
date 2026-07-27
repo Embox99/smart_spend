@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import mongoose from "mongoose";
 
 import authRoutes from "./routes/authRoutes";
@@ -36,12 +37,16 @@ app.use(
       if (allowedOrigins.includes(origin)) return callback(null, true);
       callback(new Error(`CORS: origin '${origin}' not allowed`));
     },
+    // Required for the browser to send the httpOnly session cookie. The
+    // origin is reflected rather than '*', which credentials forbid.
+    credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json({ limit: "100kb" }));
+app.use(cookieParser());
 
 app.get("/health", (_req, res) => {
   res.json({

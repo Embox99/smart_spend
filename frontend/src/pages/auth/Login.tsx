@@ -7,7 +7,7 @@ import { validateEmail } from "../../utils/helper";
 import axiosInstance, { apiErrorMessage } from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { useUser } from "../../hooks/useUser";
-import { setToken } from "../../utils/token";
+import { setSessionExpiry } from "../../utils/token";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -39,11 +39,9 @@ const Login = () => {
         { email, password }
       );
 
-      if (data.token) {
-        setToken(data.token);
-        updateUser(data.user);
-        navigate("/dashboard", { replace: true });
-      }
+      setSessionExpiry(data.expiresAt);
+      updateUser(data.user);
+      navigate("/dashboard", { replace: true });
     } catch (err) {
       setError(apiErrorMessage(err, "Something went wrong. Please try again."));
     } finally {

@@ -1,33 +1,43 @@
 import { describe, expect, it } from "vitest";
-import { clearToken, getToken, isTokenValid, setToken } from "./token";
+import { clearSession, hasLiveSession, setSessionExpiry } from "./token";
 
-/** Builds an unsigned JWT-shaped string with the given expiry. */
-const tokenExpiringIn = (seconds: number): string => {
-  const payload = { exp: Math.floor(Date.now() / 1000) + seconds };
-  return `header.${btoa(JSON.stringify(payload))}.signature`;
-};
+const inMinutes = (minutes: number) =>
+  new Date(Date.now() + minutes * 60_000).toISOString();
 
-describe("token", () => {
-  it("round-trips through localStorage", () => {
-    setToken("abc");
-    expect(getToken()).toBe("abc");
-    clearToken();
-    expect(getToken()).toBeNull();
+describe("session expiry", () => {
+  it("reports a live session while the expiry is ahead", () => {
+    setSessionExpiry(inMinutes(60));
+
+    expect(hasLiveSession()).toBe(true);
   });
 
-  it("accepts a token that has not expired", () => {
-    expect(isTokenValid(tokenExpiringIn(3600))).toBe(true);
+  it("reports no session once the expiry has passed", () => {
+    setSessionExpiry(inMinutes(-1));
+
+    expect(hasLiveSession()).toBe(false);
   });
 
-  it("rejects an expired token", () => {
-    expect(isTokenValid(tokenExpiringIn(-60))).toBe(false);
+  it("reports no session when nothing was stored", () => {
+    expect(hasLiveSession()).toBe(false);
   });
 
-  it("rejects anything that is not a readable token", () => {
-    expect(isTokenValid(null)).toBe(false);
-    expect(isTokenValid("")).toBe(false);
-    expect(isTokenValid("garbage")).toBe(false);
-    expect(isTokenValid("a.not-base64!.c")).toBe(false);
-    expect(isTokenValid(`header.${btoa('{"sub":"x"}')}.sig`)).toBe(false);
+  it("reports no session for an unparseable value", () => {
+    localStorage.setItem("sessionExpiresAt", "not-a-date");
+
+    expect(hasLiveSession()).toBe(false);
+  });
+
+  it("forgets the session on clear", () => {
+    setSessionExpiry(inMinutes(60));
+    clearSession();
+
+    expect(hasLiveSession()).toBe(false);
+  });
+
+  it("never stores anything token-shaped", () => {
+    setSessionExpiry(inMinutes(60));
+
+    // The whole point: a script reading localStorage finds no credential.
+    expect(JSON.stringify(localStorage)).not.toContain("eyJ");
   });
 });

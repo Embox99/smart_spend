@@ -9,7 +9,7 @@ import { validateEmail } from "../../utils/helper";
 import axiosInstance, { apiErrorMessage } from "../../utils/axiosInstance";
 import { API_PATH } from "../../utils/apiPaths";
 import { useUser } from "../../hooks/useUser";
-import { setToken } from "../../utils/token";
+import { setSessionExpiry } from "../../utils/token";
 import uploadImage from "../../utils/uploadImage";
 
 const SignUp = () => {
@@ -48,8 +48,9 @@ const SignUp = () => {
         { fullName, email, password }
       );
 
-      if (!data.token) throw new Error("Registration did not return a token");
-      setToken(data.token);
+      // The session cookie is already set by the response; this only records
+      // when it lapses so routing can act without a round trip.
+      setSessionExpiry(data.expiresAt);
 
       // The upload endpoint requires authentication, so the avatar goes up
       // after the account exists. A failure here must not block sign-up.

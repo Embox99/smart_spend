@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import request from "supertest";
 import app from "../app";
-import { auth, createUser, type TestUser } from "../test/helpers";
+import { createUser, type TestUser } from "../test/helpers";
 
 describe("budgets", () => {
   let user: TestUser;
@@ -9,19 +9,19 @@ describe("budgets", () => {
   const upsert = (body: Record<string, unknown>) =>
     request(app)
       .post("/api/v1/budget")
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send(body);
 
   const addExpense = (body: Record<string, unknown>) =>
     request(app)
       .post("/api/v1/expense/add")
-      .set("Authorization", auth(user.token))
+      .set("Cookie", user.cookies)
       .send(body);
 
   const getBudgets = (month: string) =>
     request(app)
       .get(`/api/v1/budget?month=${month}`)
-      .set("Authorization", auth(user.token));
+      .set("Cookie", user.cookies);
 
   beforeEach(async () => {
     user = await createUser();
@@ -81,7 +81,7 @@ describe("budgets", () => {
     const other = await createUser();
     await request(app)
       .delete(`/api/v1/budget/${created.body._id}`)
-      .set("Authorization", auth(other.token))
+      .set("Cookie", other.cookies)
       .expect(404);
   });
 });
