@@ -11,6 +11,7 @@ import dashboardRoutes from "./routes/dashboardRoutes";
 import budgetRoutes from "./routes/budgetRoutes";
 import errorHandler from "./middleware/errorHandler";
 import { apiLimiter } from "./middleware/rateLimiters";
+import { csrfGuard } from "./middleware/csrf";
 import { UPLOAD_DIR } from "./middleware/uploadMiddleware";
 import { env } from "./config/env";
 
@@ -47,6 +48,13 @@ app.use(
 
 app.use(express.json({ limit: "100kb" }));
 app.use(cookieParser());
+// SameSite=Lax covers local development; anything else checks the origin.
+app.use(
+  csrfGuard(
+    allowedOrigins,
+    env.CROSS_SITE_COOKIES || env.NODE_ENV === "production"
+  )
+);
 
 app.get("/health", (_req, res) => {
   res.json({
