@@ -23,12 +23,9 @@ describe("validateEmail", () => {
     expect(validateEmail(email)).toBe(true);
   });
 
-  it.each(["", "nope", "a@b", "a b@c.com", "@b.com"])(
-    "rejects %s",
-    (email) => {
-      expect(validateEmail(email)).toBe(false);
-    }
-  );
+  it.each(["", "nope", "a@b", "a b@c.com", "@b.com"])("rejects %s", (email) => {
+    expect(validateEmail(email)).toBe(false);
+  });
 });
 
 describe("getInitials", () => {

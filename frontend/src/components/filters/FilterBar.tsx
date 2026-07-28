@@ -23,12 +23,12 @@ const FilterBar = ({
 
   const hasActive = Boolean(
     filters.search ||
-      filters.from ||
-      filters.to ||
-      filters.minAmount ||
-      filters.maxAmount ||
-      filters.sortBy !== "date" ||
-      filters.order !== "desc"
+    filters.from ||
+    filters.to ||
+    filters.minAmount ||
+    filters.maxAmount ||
+    filters.sortBy !== "date" ||
+    filters.order !== "desc"
   );
 
   return (

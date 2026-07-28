@@ -62,7 +62,9 @@ describe("ExpenseForm", () => {
     expect(screen.getByLabelText<HTMLInputElement>(/category/i).value).toBe(
       "Coffee"
     );
-    expect(screen.getByLabelText<HTMLInputElement>(/amount/i).value).toBe("7.5");
+    expect(screen.getByLabelText<HTMLInputElement>(/amount/i).value).toBe(
+      "7.5"
+    );
     expect(screen.getByLabelText<HTMLInputElement>(/date/i).value).toBe(
       "2024-03-15"
     );

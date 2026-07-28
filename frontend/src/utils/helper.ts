@@ -37,9 +37,7 @@ const byDateAscending = <T extends { date: string }>(items: T[]): T[] =>
   );
 
 /** Dated series for the paginated Income and Expense pages. */
-export const prepareIncomeBarChartData = (
-  data: Income[] = []
-): ChartPoint[] =>
+export const prepareIncomeBarChartData = (data: Income[] = []): ChartPoint[] =>
   byDateAscending(data).map((item) => ({
     label: formatDate(item.date),
     amount: item.amount,

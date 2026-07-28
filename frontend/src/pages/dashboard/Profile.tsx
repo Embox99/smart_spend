@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import toast from "react-hot-toast";
 import { useQueryClient } from "@tanstack/react-query";
 import { LuTrash2, LuUpload } from "react-icons/lu";
@@ -29,9 +29,13 @@ const Profile = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
 
-  // Seed the form once the user arrives, without clobbering later edits.
+  // Seeded once per account. Depending on the whole user object would re-run
+  // on any background refresh of the profile query and overwrite whatever is
+  // half-typed in the fields.
+  const seededFor = useRef<string | null>(null);
   useEffect(() => {
-    if (!user) return;
+    if (!user || seededFor.current === user._id) return;
+    seededFor.current = user._id;
     setFullName(user.fullName);
     setEmail(user.email);
     setCurrency(user.currency);
@@ -45,7 +49,8 @@ const Profile = () => {
   const handleProfileSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!fullName.trim()) return toast.error("Name is required");
-    if (!validateEmail(email)) return toast.error("Enter a valid email address");
+    if (!validateEmail(email))
+      return toast.error("Enter a valid email address");
 
     setSavingProfile(true);
     try {

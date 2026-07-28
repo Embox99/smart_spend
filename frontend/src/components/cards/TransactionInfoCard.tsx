@@ -60,7 +60,9 @@ const TransactionInfoCard = ({
               {note}
             </p>
           )}
-          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{date}</p>
+          <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+            {date}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {!hideDeleteBtn && (

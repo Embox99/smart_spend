@@ -7,10 +7,7 @@ describe("budgets", () => {
   let user: TestUser;
 
   const upsert = (body: Record<string, unknown>) =>
-    request(app)
-      .post("/api/v1/budget")
-      .set("Cookie", user.cookies)
-      .send(body);
+    request(app).post("/api/v1/budget").set("Cookie", user.cookies).send(body);
 
   const addExpense = (body: Record<string, unknown>) =>
     request(app)
@@ -28,8 +25,12 @@ describe("budgets", () => {
   });
 
   it("upserts rather than duplicating a category for a month", async () => {
-    await upsert({ category: "Food", limit: 300, month: "2024-03" }).expect(200);
-    await upsert({ category: "Food", limit: 500, month: "2024-03" }).expect(200);
+    await upsert({ category: "Food", limit: 300, month: "2024-03" }).expect(
+      200
+    );
+    await upsert({ category: "Food", limit: 500, month: "2024-03" }).expect(
+      200
+    );
 
     const res = await getBudgets("2024-03").expect(200);
     expect(res.body).toHaveLength(1);

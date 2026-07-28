@@ -35,7 +35,10 @@ const note = z
 export const registerSchema = z.object({
   fullName: z.string().trim().min(1, "Name is required").max(80),
   email: z.email("Please enter a valid email address").trim().toLowerCase(),
-  password: z.string().min(6, "Password must be at least 6 characters").max(128),
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters")
+    .max(128),
   profileImageUrl: z.url().nullish().or(z.literal("")),
 });
 

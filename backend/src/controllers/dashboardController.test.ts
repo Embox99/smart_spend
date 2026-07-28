@@ -19,9 +19,7 @@ describe("dashboard", () => {
       .send(body);
 
   const getDashboard = () =>
-    request(app)
-      .get("/api/v1/dashboard")
-      .set("Cookie", user.cookies);
+    request(app).get("/api/v1/dashboard").set("Cookie", user.cookies);
 
   it("returns totals as plain numbers, not aggregate rows", async () => {
     await add("income", { source: "Salary", amount: 1000, date: today() });
@@ -118,9 +116,9 @@ describe("dashboard", () => {
     await add("income", { source: "Salary", amount: 1000, date: today() });
     await add("expense", { category: "Rent", amount: 400, date: today() });
 
-    const kinds = (await getDashboard().expect(200)).body.recentTransactions.map(
-      (t: { type: string }) => t.type
-    );
+    const kinds = (
+      await getDashboard().expect(200)
+    ).body.recentTransactions.map((t: { type: string }) => t.type);
 
     expect(kinds).toContain("income");
     expect(kinds).toContain("expense");

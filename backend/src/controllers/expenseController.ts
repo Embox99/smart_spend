@@ -49,7 +49,9 @@ export const updateExpense = asyncHandler(async (req, res) => {
   // than being rewritten.
   const expense = await Expense.findOneAndUpdate(
     { _id: req.params.id, userId: req.user?._id },
-    { $set: { icon: icon ?? null, category, amount, date, note: note ?? null } },
+    {
+      $set: { icon: icon ?? null, category, amount, date, note: note ?? null },
+    },
     { new: true, runValidators: true }
   );
 

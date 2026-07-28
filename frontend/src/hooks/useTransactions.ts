@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type {
-  Paginated,
-  Pagination,
-  TransactionFilters,
-} from "@shared/types";
+import type { Paginated, Pagination, TransactionFilters } from "@shared/types";
 import axiosInstance from "../utils/axiosInstance";
 
 const PAGE_SIZE = 20;
@@ -58,7 +54,10 @@ const useTransactions = <T>(endpoint: string): UseTransactionsResult<T> => {
   // once, so those bypass the delay.
   const [debouncedSearch, setDebouncedSearch] = useState("");
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(filters.search), DEBOUNCE_MS);
+    const timer = setTimeout(
+      () => setDebouncedSearch(filters.search),
+      DEBOUNCE_MS
+    );
     return () => clearTimeout(timer);
   }, [filters.search]);
 

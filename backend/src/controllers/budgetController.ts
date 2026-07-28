@@ -24,7 +24,9 @@ export const getBudgets = asyncHandler(async (req, res) => {
     Budget.find({ userId, month }).sort({ category: 1 }).lean(),
     Expense.aggregate<SpentRow>([
       { $match: { userId, date: { $gte: from, $lt: to } } },
-      { $group: { _id: { $toLower: "$category" }, spent: { $sum: "$amount" } } },
+      {
+        $group: { _id: { $toLower: "$category" }, spent: { $sum: "$amount" } },
+      },
     ]),
   ]);
 

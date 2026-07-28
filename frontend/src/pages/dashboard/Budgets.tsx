@@ -19,7 +19,8 @@ import { useInvalidateFinancials } from "../../hooks/useInvalidateFinancials";
 
 const toMonthStr = (d: Date): string => format(d, "yyyy-MM");
 const fromMonthStr = (s: string): Date => parseISO(`${s}-01`);
-const displayMonth = (s: string): string => format(fromMonthStr(s), "MMMM yyyy");
+const displayMonth = (s: string): string =>
+  format(fromMonthStr(s), "MMMM yyyy");
 
 const Budgets = () => {
   const [month, setMonth] = useState(toMonthStr(new Date()));

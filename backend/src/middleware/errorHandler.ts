@@ -39,9 +39,9 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
 
   if (name === "MulterError") {
     const isTooLarge = (err as { code?: string }).code === "LIMIT_FILE_SIZE";
-    res
-      .status(400)
-      .json({ message: isTooLarge ? "File is larger than 2 MB" : "Upload rejected" });
+    res.status(400).json({
+      message: isTooLarge ? "File is larger than 2 MB" : "Upload rejected",
+    });
     return;
   }
 

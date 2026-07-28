@@ -1,0 +1,14 @@
+# Normalise line endings so a checkout is identical on every platform and
+# Windows clones stop rewriting every file to CRLF.
+* text=auto eol=lf
+
+# Binary — never touch these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.xlsx binary
+
+# Generated; keep them out of diffs and reviews.
+package-lock.json linguist-generated=true -diff

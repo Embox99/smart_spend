@@ -20,10 +20,7 @@ const binaryParser = (
 const asParser = binaryParser as unknown as (str: string) => unknown;
 
 const addExpense = (user: TestUser, body: Record<string, unknown>) =>
-  request(app)
-    .post(`${ENDPOINT}/add`)
-    .set("Cookie", user.cookies)
-    .send(body);
+  request(app).post(`${ENDPOINT}/add`).set("Cookie", user.cookies).send(body);
 
 describe("expenses", () => {
   let user: TestUser;
@@ -103,7 +100,11 @@ describe("expenses", () => {
       amount: 5,
       date: "2024-03-01",
     });
-    await addExpense(user, { category: "Rent", amount: 900, date: "2024-03-20" });
+    await addExpense(user, {
+      category: "Rent",
+      amount: 900,
+      date: "2024-03-20",
+    });
 
     const bySearch = await request(app)
       .get(`${ENDPOINT}/get?search=cof`)
