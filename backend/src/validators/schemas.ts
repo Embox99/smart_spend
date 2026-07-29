@@ -24,6 +24,13 @@ const objectId = z.string().regex(/^[0-9a-fA-F]{24}$/, "Malformed identifier");
 
 const icon = z.string().max(2048).nullish();
 
+/**
+ * Optional precondition on an update: the caller states which version it
+ * loaded, and the write is refused if the record moved on since. Without it
+ * two tabs silently overwrite each other, last one wins.
+ */
+const expectedVersion = z.coerce.date().optional();
+
 // Empty strings arrive from a cleared textarea; store them as absent.
 const note = z
   .string()
@@ -76,6 +83,7 @@ export const expenseSchema = z.object({
   date: isoDate,
   icon,
   note,
+  updatedAt: expectedVersion,
 });
 
 export const incomeSchema = z.object({
@@ -84,6 +92,7 @@ export const incomeSchema = z.object({
   date: isoDate,
   icon,
   note,
+  updatedAt: expectedVersion,
 });
 
 export const budgetSchema = z.object({

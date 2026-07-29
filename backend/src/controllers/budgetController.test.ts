@@ -72,6 +72,49 @@ describe("budgets", () => {
     await getBudgets("March").expect(400);
   });
 
+  it("caps how many budgets a month can hold", async () => {
+    for (let i = 0; i < 60; i += 1) {
+      await upsert({
+        category: `Cat ${i}`,
+        limit: 100,
+        month: "2024-03",
+      }).expect(200);
+    }
+
+    const res = await upsert({
+      category: "One too many",
+      limit: 100,
+      month: "2024-03",
+    }).expect(400);
+
+    expect(res.body.message).toContain("at most 60");
+  });
+
+  it("still updates an existing budget once the cap is reached", async () => {
+    for (let i = 0; i < 60; i += 1) {
+      await upsert({ category: `Cat ${i}`, limit: 100, month: "2024-03" });
+    }
+
+    // The cap bounds distinct categories, not edits to them.
+    const res = await upsert({
+      category: "Cat 0",
+      limit: 500,
+      month: "2024-03",
+    }).expect(200);
+
+    expect(res.body.limit).toBe(50000);
+  });
+
+  it("counts the cap per month, not overall", async () => {
+    for (let i = 0; i < 60; i += 1) {
+      await upsert({ category: `Cat ${i}`, limit: 100, month: "2024-03" });
+    }
+
+    await upsert({ category: "April", limit: 100, month: "2024-04" }).expect(
+      200
+    );
+  });
+
   it("refuses to delete a budget owned by someone else", async () => {
     const created = await upsert({
       category: "Food",

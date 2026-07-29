@@ -43,17 +43,28 @@ export const getAllIncome = asyncHandler(async (req, res) => {
 
 // PUT /api/v1/income/:id
 export const updateIncome = asyncHandler(async (req, res) => {
-  const { icon, source, amount, date, note } = req.body as IncomeInput;
+  const { icon, source, amount, date, note, updatedAt } =
+    req.body as IncomeInput;
 
   // Scoped by userId so a valid id belonging to someone else 404s rather
-  // than being rewritten.
+  // than being rewritten. When the caller states the version it loaded, that
+  // becomes part of the match, so a record edited elsewhere is not clobbered.
+  const owned = { _id: req.params.id, userId: req.user?._id };
   const income = await Income.findOneAndUpdate(
-    { _id: req.params.id, userId: req.user?._id },
+    updatedAt ? { ...owned, updatedAt } : owned,
     { $set: { icon: icon ?? null, source, amount, date, note: note ?? null } },
     { new: true, runValidators: true }
   );
 
-  if (!income) throw AppError.notFound("Income not found");
+  if (!income) {
+    // Distinguish "gone" from "moved on" — they need different UI.
+    if (updatedAt && (await Income.exists(owned))) {
+      throw AppError.conflict(
+        "This income changed elsewhere. Reload before saving."
+      );
+    }
+    throw AppError.notFound("Income not found");
+  }
 
   res.json(income);
 });
@@ -99,6 +110,7 @@ export const downloadIncomeExcel = asyncHandler(async (req, res) => {
       },
       { header: "Note", key: "note", width: 40 },
     ],
+    truncated: incomes.length === EXPORT_LIMIT,
     rows: incomes.map((i) => ({
       source: i.source,
       amount: toMajorUnits(i.amount),

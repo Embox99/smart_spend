@@ -22,6 +22,7 @@ const RecentIncome = ({ transactions = [], onSeeMore }: RecentIncomeProps) => (
           key={item._id}
           title={item.source}
           icon={item.icon}
+          note={item.note}
           date={formatFullDate(item.date)}
           amount={item.amount}
           type="income"

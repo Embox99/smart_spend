@@ -50,10 +50,12 @@ const Income = () => {
 
     try {
       if (editing) {
-        await axiosInstance.put(
-          API_PATH.INCOME.UPDATE_INCOME(editing._id),
-          payload
-        );
+        // Send the version we loaded so a save from another tab is not
+        // silently overwritten — the API answers 409 instead.
+        await axiosInstance.put(API_PATH.INCOME.UPDATE_INCOME(editing._id), {
+          ...payload,
+          updatedAt: editing.updatedAt,
+        });
       } else {
         await axiosInstance.post(API_PATH.INCOME.ADD_INCOME, payload);
       }
@@ -81,10 +83,13 @@ const Income = () => {
 
   const handleDownload = async () => {
     try {
-      await downloadFile(
+      const { truncatedAt } = await downloadFile(
         `${API_PATH.INCOME.DOWNLOAD_INCOME}?${buildParams(filters)}`,
         "income_details.xlsx"
       );
+      if (truncatedAt) {
+        toast(`Export capped at ${truncatedAt.toLocaleString()} rows`);
+      }
     } catch {
       toast.error("Failed to download. Please try again.");
     }
@@ -136,6 +141,7 @@ const Income = () => {
           <DeleteAlert
             content="Are you sure you want to delete this income?"
             onDelete={deleteIncome}
+            onCancel={() => setDeleteId(null)}
           />
         </Modal>
       </div>

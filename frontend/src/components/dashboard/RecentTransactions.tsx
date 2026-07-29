@@ -25,6 +25,7 @@ const RecentTransactions = ({
           key={item._id}
           title={"category" in item ? item.category : item.source}
           icon={item.icon}
+          note={item.note}
           date={formatFullDate(item.date)}
           amount={item.amount}
           type={item.type}

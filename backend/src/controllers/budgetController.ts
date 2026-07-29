@@ -7,6 +7,8 @@ import AppError from "../utils/AppError";
 import { monthRange } from "../utils/dateRange";
 import type { BudgetInput, BudgetQuery } from "../validators/schemas";
 
+const MAX_BUDGETS_PER_MONTH = 60;
+
 interface SpentRow {
   _id: string;
   spent: number;
@@ -54,9 +56,22 @@ export const getBudgets = asyncHandler(async (req, res) => {
 // POST /api/v1/budget
 export const upsertBudget = asyncHandler(async (req, res) => {
   const { category, limit, month, icon } = req.body as BudgetInput;
+  const userId = req.user?._id;
+
+  // The month view renders every budget at once and is not paginated, so the
+  // set is bounded here rather than truncated silently on read.
+  const isNew = !(await Budget.exists({ userId, category, month }));
+  if (isNew) {
+    const existing = await Budget.countDocuments({ userId, month });
+    if (existing >= MAX_BUDGETS_PER_MONTH) {
+      throw AppError.badRequest(
+        `A month can hold at most ${MAX_BUDGETS_PER_MONTH} budgets`
+      );
+    }
+  }
 
   const budget = await Budget.findOneAndUpdate(
-    { userId: req.user?._id, category, month },
+    { userId, category, month },
     { $set: { limit, icon: icon ?? null } },
     { upsert: true, new: true, runValidators: true, setDefaultsOnInsert: true }
   );

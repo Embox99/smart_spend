@@ -50,10 +50,12 @@ const Expense = () => {
 
     try {
       if (editing) {
-        await axiosInstance.put(
-          API_PATH.EXPENSE.UPDATE_EXPENSE(editing._id),
-          payload
-        );
+        // Send the version we loaded so a save from another tab is not
+        // silently overwritten — the API answers 409 instead.
+        await axiosInstance.put(API_PATH.EXPENSE.UPDATE_EXPENSE(editing._id), {
+          ...payload,
+          updatedAt: editing.updatedAt,
+        });
       } else {
         await axiosInstance.post(API_PATH.EXPENSE.ADD_EXPENSE, payload);
       }
@@ -81,10 +83,13 @@ const Expense = () => {
 
   const handleDownload = async () => {
     try {
-      await downloadFile(
+      const { truncatedAt } = await downloadFile(
         `${API_PATH.EXPENSE.DOWNLOAD_EXPENSE}?${buildParams(filters)}`,
         "expense_details.xlsx"
       );
+      if (truncatedAt) {
+        toast(`Export capped at ${truncatedAt.toLocaleString()} rows`);
+      }
     } catch {
       toast.error("Failed to download. Please try again.");
     }
@@ -136,6 +141,7 @@ const Expense = () => {
           <DeleteAlert
             content="Are you sure you want to delete this expense?"
             onDelete={deleteExpense}
+            onCancel={() => setDeleteId(null)}
           />
         </Modal>
       </div>

@@ -43,19 +43,30 @@ export const getAllExpense = asyncHandler(async (req, res) => {
 
 // PUT /api/v1/expense/:id
 export const updateExpense = asyncHandler(async (req, res) => {
-  const { icon, category, amount, date, note } = req.body as ExpenseInput;
+  const { icon, category, amount, date, note, updatedAt } =
+    req.body as ExpenseInput;
 
   // Scoped by userId so a valid id belonging to someone else 404s rather
-  // than being rewritten.
+  // than being rewritten. When the caller states the version it loaded, that
+  // becomes part of the match, so a record edited elsewhere is not clobbered.
+  const owned = { _id: req.params.id, userId: req.user?._id };
   const expense = await Expense.findOneAndUpdate(
-    { _id: req.params.id, userId: req.user?._id },
+    updatedAt ? { ...owned, updatedAt } : owned,
     {
       $set: { icon: icon ?? null, category, amount, date, note: note ?? null },
     },
     { new: true, runValidators: true }
   );
 
-  if (!expense) throw AppError.notFound("Expense not found");
+  if (!expense) {
+    // Distinguish "gone" from "moved on" — they need different UI.
+    if (updatedAt && (await Expense.exists(owned))) {
+      throw AppError.conflict(
+        "This expense changed elsewhere. Reload before saving."
+      );
+    }
+    throw AppError.notFound("Expense not found");
+  }
 
   res.json(expense);
 });
@@ -101,6 +112,7 @@ export const downloadExpenseExcel = asyncHandler(async (req, res) => {
       },
       { header: "Note", key: "note", width: 40 },
     ],
+    truncated: expenses.length === EXPORT_LIMIT,
     rows: expenses.map((e) => ({
       category: e.category,
       amount: toMajorUnits(e.amount),

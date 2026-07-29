@@ -278,6 +278,85 @@ describe("expenses", () => {
       .expect(400);
   });
 
+  it("refuses an update whose version is stale", async () => {
+    const created = await addExpense(user, {
+      category: "Coffee",
+      amount: 5,
+      date: "2024-03-15",
+    });
+    const staleVersion = created.body.updatedAt;
+
+    // Another tab saves first.
+    await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Cookie", user.cookies)
+      .send({ category: "Tea", amount: 6, date: "2024-03-15" })
+      .expect(200);
+
+    const res = await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Cookie", user.cookies)
+      .send({
+        category: "Juice",
+        amount: 7,
+        date: "2024-03-15",
+        updatedAt: staleVersion,
+      })
+      .expect(409);
+
+    expect(res.body.message).toContain("changed elsewhere");
+
+    // The first writer's value survived.
+    const list = await request(app)
+      .get(`${ENDPOINT}/get`)
+      .set("Cookie", user.cookies);
+    expect(list.body.data[0].category).toBe("Tea");
+  });
+
+  it("accepts an update whose version is current", async () => {
+    const created = await addExpense(user, {
+      category: "Coffee",
+      amount: 5,
+      date: "2024-03-15",
+    });
+
+    await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Cookie", user.cookies)
+      .send({
+        category: "Tea",
+        amount: 6,
+        date: "2024-03-15",
+        updatedAt: created.body.updatedAt,
+      })
+      .expect(200);
+  });
+
+  it("still 404s a stale version for a record that is gone", async () => {
+    const created = await addExpense(user, {
+      category: "Coffee",
+      amount: 5,
+      date: "2024-03-15",
+    });
+    const version = created.body.updatedAt;
+
+    await request(app)
+      .delete(`${ENDPOINT}/${created.body._id}`)
+      .set("Cookie", user.cookies)
+      .expect(200);
+
+    await request(app)
+      .put(`${ENDPOINT}/${created.body._id}`)
+      .set("Cookie", user.cookies)
+      .send({
+        category: "Tea",
+        amount: 6,
+        date: "2024-03-15",
+        updatedAt: version,
+      })
+      .expect(404);
+  });
+
   it("refuses to update an expense owned by someone else", async () => {
     const other = await createUser();
     const created = await addExpense(other, {

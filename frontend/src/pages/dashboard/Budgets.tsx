@@ -207,6 +207,7 @@ const Budgets = () => {
         <DeleteAlert
           content="Are you sure you want to delete this budget? This won't affect your transactions."
           onDelete={handleDelete}
+          onCancel={() => setDeleteId(null)}
         />
       </Modal>
     </DashboardLayout>

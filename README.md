@@ -27,7 +27,8 @@ support.
 - Optional free-text note on every record, matched by search
 - Debounced search and multi-field filters — by date range, amount, and category/source
 - Paginated lists (20 per page) with server-side sorting
-- Export filtered results to Excel (.xlsx), capped at 10k rows
+- Export filtered results to Excel (.xlsx), capped at 10k rows — the cap is
+  reported back rather than truncating silently
 
 **Budgets**
 
@@ -227,7 +228,7 @@ pass `Authorization: Bearer <token>` instead.
 | ------ | ---------------------------- | ------------------------------------------ |
 | POST | `/:kind/add` | `source`/`category`, `amount`, `date`, `icon?`, `note?` (≤ 280 chars) |
 | GET | `/:kind/get` | Paginated, filterable — see below |
-| PUT | `/:kind/:id` | Same body as create; owner only, 404 otherwise |
+| PUT | `/:kind/:id` | Same body as create; owner only, 404 otherwise. Pass the record's `updatedAt` to make the write conditional — 409 if it changed meanwhile |
 | DELETE | `/:kind/:id` | Owner only; 404 otherwise |
 | GET | `/:kind/downloadexcel` | Same filters, returns .xlsx |
 
